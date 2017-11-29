@@ -62,11 +62,19 @@ class Rule:
     def _on_submission_received(self):
         """Notify once a submission has been received."""
         link = ''
+        data = {}
         # Check if we can create a link
         if 'submission_id' in self._message.metadata and self._message.metadata['submission_id']:
+            data['submission_id'] = self._message.metadata['submission_id']
             link = self._generate_link(PATH_SUBMISSION, self._message.metadata['submission_id'])
-        message = self._generate_html_email(BODY_SUB_RECEIVED, link)
+            data['link'] = link
         to = [self._message.user_identifier]
+        if 'barcode' in self._message.metadata and self._message.metadata['barcode']:
+            data['barcode'] = self._message.metadata['barcode']
+        if 'created_at' in self._message.metadata and self._message.metadata['created_at']:
+            data['created_at'] = self._message.metadata['created_at']
+        if 'all_received' in self._message.metadata and self._message.metadata['all_received']:
+            data['all_received'] = self._message.metadata['all_received']
         if self._message.metadata['sample_custodian']:
             to.append(self._message.metadata['sample_custodian'])
         if self._message.metadata['deputies'] and len(self._message.metadata['deputies']) > 0:
@@ -75,8 +83,8 @@ class Rule:
         self._notify.send_email(subject=SBJ_SUB_RECEIVED,
                                 from_address=self._config.email.from_address,
                                 to=to,
-                                plain_message=message,
-                                html_message=message)
+                                template='submission_received',
+                                data=data)
 
     def _generate_link(self, path, id):
         return '{}://{}:{}/{}/{}'.format(self._config.link.protocol,
