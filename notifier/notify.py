@@ -16,7 +16,7 @@ class Notify:
         self._jinja_env = Environment(
             loader=FileSystemLoader(
                 os.path.join(os.path.abspath(os.path.dirname(__file__)), 'templates')),
-            autoescape=select_autoescape(['html', 'txt']))
+            autoescape=select_autoescape(['html', ]))
 
     def send_email(self, subject, from_address, to, template, data):
         """Curate and send an email."""
