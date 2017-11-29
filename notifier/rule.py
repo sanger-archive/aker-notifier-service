@@ -75,9 +75,11 @@ class Rule:
             data['created_at'] = self._message.metadata['created_at']
         if 'all_received' in self._message.metadata and self._message.metadata['all_received']:
             data['all_received'] = self._message.metadata['all_received']
-        if self._message.metadata['sample_custodian']:
+        if ('sample_custodian' in self._message.metadata
+                and self._message.metadata['sample_custodian']):
             to.append(self._message.metadata['sample_custodian'])
-        if self._message.metadata['deputies'] and len(self._message.metadata['deputies']) > 0:
+        if ('deputies' in self._message.metadata and self._message.metadata['deputies']
+                and len(self._message.metadata['deputies']) > 0):
             for dep in self._message.metadata['deputies']:
                 to.append(dep)
         self._notify.send_email(subject=SBJ_SUB_RECEIVED,
