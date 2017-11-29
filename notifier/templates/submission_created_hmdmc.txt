@@ -1,0 +1,11 @@
+{% extends "base.txt" %}
+
+{% block content %}
+Material Submission {{ submission_id }} has been created by {{ user_identifier }} and contains HMDMC numbers requiring verification.
+
+{% for hmdmc in hmdmc_numbers %}
+{{ hmdmc }}
+{% endfor %}
+
+Please visit {{ link }} to view the submission.
+{% endblock %}
