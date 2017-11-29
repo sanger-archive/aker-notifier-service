@@ -25,11 +25,14 @@ class Rule:
     def _on_submission_create(self):
         """Notify once a submission has been created."""
         link = ''
+        data = {}
         # Check if we can create a link
         if 'submission_id' in self._message.metadata and self._message.metadata['submission_id']:
+            data['submission_id'] = self._message.metadata['submission_id']
             link = self._generate_link(PATH_SUBMISSION, self._message.metadata['submission_id'])
-        message = self._generate_html_email(BODY_SUB_CREATED, link)
+            data['link'] = link
         to = [self._message.user_identifier]
+        data['user_identifier'] = self._message.user_identifier
         # Add the sample custodian to the to list
         if ('sample_custodian' in self._message.metadata
                 and self._message.metadata['sample_custodian']):
@@ -44,17 +47,17 @@ class Rule:
         self._notify.send_email(subject=SBJ_SUB_CREATED,
                                 from_address=self._config.email.from_address,
                                 to=to,
-                                plain_message=message,
-                                html_message=message)
-        # Send an email to the ethics officer
-        if 'hmdmc_number' in self._message.metadata and self._message.metadata['hmdmc_number']:
-            # Use the same link we have already created for the submission
-            message = self._generate_html_email(BODY_SUB_CREATED_HMDMC, link)
-            self._notify.send_email(subject=SBJ_SUB_CREATED_HMDMC,
-                                    from_address=self._config.email.from_address,
-                                    to=[self._config.contact.email_hmdmc_verify],
-                                    plain_message=message,
-                                    html_message=message)
+                                template='submission_created',
+                                data=data)
+        # # Send an email to the ethics officer
+        # if 'hmdmc_number' in self._message.metadata and self._message.metadata['hmdmc_number']:
+        #     # Use the same link we have already created for the submission
+        #     message = self._generate_html_email(BODY_SUB_CREATED_HMDMC, link)
+        #     self._notify.send_email(subject=SBJ_SUB_CREATED_HMDMC,
+        #                             from_address=self._config.email.from_address,
+        #                             to=[self._config.contact.email_hmdmc_verify],
+        #                             plain_message=message,
+        #                             html_message=message)
 
     def _on_submission_received(self):
         """Notify once a submission has been received."""
@@ -74,18 +77,6 @@ class Rule:
                                 to=to,
                                 plain_message=message,
                                 html_message=message)
-
-    def _generate_html_email(self, email_body, link):
-        """Generate a HTML version of the email."""
-        return '''
-            <html>
-                <head></head>
-                <body>
-                    <p>{}</p>
-                    Please follow this <a href="{}">link</a>.
-                    <p>{}</p>
-                </body>
-            </html>'''.format(email_body, link, SIGNOFF_EMAIL)
 
     def _generate_link(self, path, id):
         return '{}://{}:{}/{}/{}'.format(self._config.link.protocol,
