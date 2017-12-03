@@ -22,6 +22,8 @@ class Notify:
         """Curate and send an email."""
         with SMTP(host=self._config.email.smtp_host,
                   port=self._config.email.smtp_port) as smtp:
+
+            # TODO: add check for login
             # Login to SMTP server
             smtp.login(user=self._config.email.smtp_username,
                        password=self._config.email.smtp_password)
