@@ -18,6 +18,8 @@ class Rule:
             self._on_submission_create()
         elif self._message.event_type == EVENT_SUB_RECEIVED:
             self._on_submission_received()
+        elif self._message.event_type == EVENT_WO_SUBMITTED:
+            self._on_work_order_submitted()
         else:
             pass
 
@@ -56,6 +58,16 @@ class Rule:
                                 template='submission_received',
                                 data=data)
 
+    def _on_work_order_submitted(self):
+        """Notify once a work order has been submitted."""
+        to, data, link = self._common_work_order()
+        data['user_identifier'] = self._message.user_identifier
+        self._notify.send_email(subject=SBJ_WO_SUBMITTED,
+                                from_address=self._config.email.from_address,
+                                to=to,
+                                template='wo_submitted',
+                                data=data)
+
     def _common_submission(self):
         """Extract the common info for submission events."""
         link = ''
@@ -73,6 +85,18 @@ class Rule:
         if 'deputies' in self._message.metadata and self._message.metadata['deputies']:
             for dep in self._message.metadata['deputies']:
                 to.append(dep)
+        return to, data, link
+
+    def _common_work_order(self):
+        """Extract the common info for work order events."""
+        link = ''
+        data = {}
+        to = [self._message.user_identifier]
+        # Check if we can create a link
+        if 'work_order_id' in self._message.metadata and self._message.metadata['work_order_id']:
+            data['work_order_id'] = self._message.metadata['work_order_id']
+            link = self._generate_link(PATH_WORK_ORDER, self._message.metadata['work_order_id'])
+            data['link'] = link
         return to, data, link
 
     def _generate_link(self, path, id):

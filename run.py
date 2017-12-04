@@ -88,19 +88,11 @@ def main():
                                                credentials=credentials)
         with closing(pika.BlockingConnection(parameters=parameters)) as connection:
             channel = connection.channel()
-            # Declare the exchage (create it if it does not yet exist)
-            # Currently not sure who should create the exchange and bindings etc. should each
-            #   producer and the consumers assume they have been created? Should the consumers
-            #   create if they do not yet exist?
-            channel.exchange_declare(exchange=config.broker.exchange,
-                                     exchange_type=config.broker.exchange_type,
-                                     durable=True)
-            # Declare the queue - not sure if it should happen here...
-            channel.queue_declare(queue=config.broker.queue, durable=True)
-            # Bind the queue to the exchange
-            channel.queue_bind(queue=config.broker.queue, exchange=config.broker.exchange)
+
             # Configure a basic consumer
-            channel.basic_consume(on_message_partial, config.broker.queue)
+            channel.basic_consume(consumer_callback=on_message_partial,
+                                  queue=config.broker.queue,
+                                  consumer_tag='aker-events-notifier')
             try:
                 print('Listening on queue: {!s}...'.format(config.broker.queue))
                 channel.start_consuming()
