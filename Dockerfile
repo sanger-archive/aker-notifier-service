@@ -1,4 +1,4 @@
-# aker-submission-gui
+# aker-events-notifier
 # Use python 3.6.3
 FROM python:3.6.3
 
