@@ -74,43 +74,30 @@ def main():
     config = Config(config_file_path)
 
     # Daemonize the script
-    # with DaemonContext(
-    #         working_directory=os.getcwd(),
-    #         stdout=open(config.process.log_file, 'w'),
-    #         stderr=open(config.process.error_log, 'w'),
-    #         pidfile=pidfile.PIDLockFile(config.process.pidfile)):
+    with DaemonContext(
+            working_directory=os.getcwd(),
+            stdout=open(config.process.log_file, 'w'),
+            stderr=open(config.process.error_log, 'w'),
+            pidfile=pidfile.PIDLockFile(config.process.pidfile)):
 
-    on_message_partial = partial(on_message, env=env, config=config)
+        on_message_partial = partial(on_message, env=env, config=config)
 
-    credentials = pika.PlainCredentials(config.broker.user, config.broker.password)
-    parameters = pika.ConnectionParameters(host=config.broker.host,
-                                           port=config.broker.port,
-                                           credentials=credentials)
-    with closing(pika.BlockingConnection(parameters=parameters)) as connection:
-        channel = connection.channel()
+        credentials = pika.PlainCredentials(config.broker.user, config.broker.password)
+        parameters = pika.ConnectionParameters(host=config.broker.host,
+                                               port=config.broker.port,
+                                               credentials=credentials)
+        with closing(pika.BlockingConnection(parameters=parameters)) as connection:
+            channel = connection.channel()
 
-        # TODO: I don't think we need to declare the exchanges and queues here
-        # Declare the exchage (create it if it does not yet exist)
-        # Currently not sure who should create the exchange and bindings etc. should each
-        #   producer and the consumers assume they have been created? Should the consumers
-        #   create if they do not yet exist?
-        # channel.exchange_declare(exchange=config.broker.exchange,
-        #                          exchange_type=config.broker.exchange_type,
-        #                          durable=True)
-        # Declare the queue - not sure if it should happen here...
-        # channel.queue_declare(queue=config.broker.queue, durable=True)
-        # Bind the queue to the exchange
-        # channel.queue_bind(queue=config.broker.queue, exchange=config.broker.exchange)
-
-        # Configure a basic consumer
-        channel.basic_consume(consumer_callback=on_message_partial,
-                              queue=config.broker.queue,
-                              consumer_tag='aker-events-notifier')
-        try:
-            print('Listening on queue: {!s}...'.format(config.broker.queue))
-            channel.start_consuming()
-        finally:
-            channel.stop_consuming()
+            # Configure a basic consumer
+            channel.basic_consume(consumer_callback=on_message_partial,
+                                  queue=config.broker.queue,
+                                  consumer_tag='aker-events-notifier')
+            try:
+                print('Listening on queue: {!s}...'.format(config.broker.queue))
+                channel.start_consuming()
+            finally:
+                channel.stop_consuming()
 
 
 if __name__ == '__main__':
