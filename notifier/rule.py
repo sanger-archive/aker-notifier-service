@@ -20,6 +20,8 @@ class Rule:
             self._on_submission_received()
         elif self._message.event_type == EVENT_WO_SUBMITTED:
             self._on_work_order_submitted()
+        elif self._message.event_type == EVENT_WO_COMPLETED:
+            self._on_work_order_completed()
         else:
             pass
 
@@ -34,8 +36,8 @@ class Rule:
                                 template='submission_created',
                                 data=data)
         # Send an email to the ethics officer
-        if 'hmdmc_numbers' in self._message.metadata and self._message.metadata['hmdmc_numbers']:
-            data['hmdmc_numbers'] = self._message.metadata['hmdmc_numbers']
+        if 'hmdmc_list' in self._message.metadata and self._message.metadata['hmdmc_list']:
+            data['hmdmc_list'] = self._message.metadata['hmdmc_list']
             # Use the same link we have already created for the submission
             self._notify.send_email(subject=SBJ_SUB_CREATED_HMDMC,
                                     from_address=self._config.email.from_address,
@@ -66,6 +68,16 @@ class Rule:
                                 from_address=self._config.email.from_address,
                                 to=to,
                                 template='wo_submitted',
+                                data=data)
+
+    def _on_work_order_completed(self):
+        """Notify once a work order has been completed."""
+        to, data, link = self._common_work_order()
+        data['user_identifier'] = self._message.user_identifier
+        self._notify.send_email(subject=SBJ_WO_COMPLETED,
+                                from_address=self._config.email.from_address,
+                                to=to,
+                                template='wo_completed',
                                 data=data)
 
     def _common_submission(self):
