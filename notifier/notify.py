@@ -23,10 +23,10 @@ class Notify:
         with SMTP(host=self._config.email.smtp_host,
                   port=self._config.email.smtp_port) as smtp:
 
-            # TODO: add check for login
             # Login to SMTP server
-            smtp.login(user=self._config.email.smtp_username,
-                       password=self._config.email.smtp_password)
+            if self._config.email.smtp_username:
+                smtp.login(user=self._config.email.smtp_username,
+                           password=self._config.email.smtp_password)
 
             msg = MIMEMultipart('alternative')
 

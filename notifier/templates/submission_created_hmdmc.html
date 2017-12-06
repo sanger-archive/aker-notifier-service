@@ -11,12 +11,8 @@
     HMDMC numbers requiring verification.
 
     <ul>
-      {% for hmdmc in hmdmc_numbers %}
+      {% for hmdmc in hmdmc_list %}
       <li>{{ hmdmc }}</li>
       {% endfor %}
     </ul>
-
-    <p>
-      Please visit this <a href="{{ link }}">link</a> to view the submission.
-    </p>
 {% endblock %}
