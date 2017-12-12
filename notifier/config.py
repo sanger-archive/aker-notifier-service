@@ -12,7 +12,7 @@ class Config:
                                                smtp_port,
                                                smtp_username,
                                                smtp_password''')
-    ProcessConfig = namedtuple('ProcessConfig', 'log_file error_log pidfile')
+    ProcessConfig = namedtuple('ProcessConfig', 'stdout_log stderr_log pidfile')
     ContactConfig = namedtuple('ContactConfig', 'email_dev_team email_hmdmc_verify')
     LinkConfig = namedtuple('LinkConfig', 'protocol root port')
 
@@ -72,8 +72,8 @@ class Config:
     def _process_config(self, config, section):
         """Extract the config for logging and controlling the running process."""
         return self.ProcessConfig(
-            config.get(section, 'log_file'),
-            config.get(section, 'error_log'),
+            config.get(section, 'stdout_log'),
+            config.get(section, 'stderr_log'),
             config.get(section, 'pidfile'),
         )
 

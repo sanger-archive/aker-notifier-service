@@ -1,9 +1,12 @@
+import logging
+import os
 from .consts import *
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import os
 from smtplib import SMTP
+
+logger = logging.getLogger(__name__)
 
 
 class Notify:
@@ -23,8 +26,9 @@ class Notify:
         with SMTP(host=self._config.email.smtp_host,
                   port=self._config.email.smtp_port) as smtp:
             # Login to SMTP server
-            smtp.login(user=self._config.email.smtp_username,
-                       password=self._config.email.smtp_password)
+            if self._config.email.smtp_username:
+                smtp.login(user=self._config.email.smtp_username,
+                           password=self._config.email.smtp_password)
 
             msg = MIMEMultipart('alternative')
 
@@ -44,5 +48,7 @@ class Notify:
             msg['Subject'] = subject
             msg['From'] = from_address
             msg['To'] = ', '.join(to)
+
+            logger.debug('Sending email to {}'.format(msg['To']))
             smtp.send_message(msg)
             smtp.quit()

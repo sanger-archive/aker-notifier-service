@@ -58,5 +58,5 @@ class Message:
         return cls(**data)
 
     def __repr__(self):
-        """Represent an object using the class name and 'event_type'."""
-        return 'Message(event_type)'
+        """Represent an object using the class name and the event_type."""
+        return 'Message({}) @ {!s}'.format(self.event_type, self.timestamp)

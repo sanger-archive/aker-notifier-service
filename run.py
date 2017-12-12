@@ -3,15 +3,37 @@
 
 import argparse
 import json
+import logging
+import logging.config
 import os
 import pika
 import sys
 import traceback
+import yaml
 from contextlib import closing
 from daemon import DaemonContext, pidfile
 from functools import partial
 from notifier import consts
 from notifier import Config, Message, Notify, Rule
+
+logger = logging.getLogger(__name__)
+
+
+def configure_logging(env):
+    logging_config_path = '{!s}/{!s}/logging.yml'.format(
+        os.path.dirname(os.path.realpath(__file__)),
+        consts.PATH_CONFIG)
+    with open(logging_config_path) as stream:
+        try:
+            config_file = yaml.load(stream)
+            logging.config.dictConfig(config_file)
+        except yaml.YAMLError as e:
+            print(e)
+
+    if env in (consts.ENV_DEV, consts.ENV_TEST):
+        logger.setLevel('DEBUG')
+    else:
+        logger.setLevel('INFO')
 
 
 def on_message(channel, method_frame, header_frame, body, env, config):
@@ -20,11 +42,10 @@ def on_message(channel, method_frame, header_frame, body, env, config):
     """
     notify = Notify(env, config)
     try:
-        print('method_frame.routing_key: {!s}'.format(method_frame.routing_key))
-        print('method_frame.delivery_tag: {!s}'.format(method_frame.delivery_tag))
-        print('body: {!s}'.format(body))
+        logger.info('Processing message: {!s}'.format(method_frame.delivery_tag))
+        logger.debug('Message body: {!s}'.format(body))
         message = Message.from_json(body)
-        print('message: {!s}'.format(message))
+        logger.debug('message: {!s}'.format(message))
         rule = Rule(env=env, config=config, message=message)
         rule.check_rules()
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
@@ -34,7 +55,7 @@ def on_message(channel, method_frame, header_frame, body, env, config):
             # Nack the message and try to requeue it
             channel.basic_nack(delivery_tag=method_frame.delivery_tag, requeue=False)
 
-            print('Error processing message. Not acknowledging.')
+            logger.exception('Error processing message. Not acknowledging.')
 
             # Notify the devs that a message failed
             notify.send_email(subject=consts.SBJ_MSG_FAILED,
@@ -44,7 +65,7 @@ def on_message(channel, method_frame, header_frame, body, env, config):
                               data={'message': body, 'traceback': traceback.format_exc()})
         except Exception:
             traceback.print_exc(file=sys.stderr)
-            print('Failed to nack message.')
+            logger.exception('Failed to nack message.')
 
             # Notify devs that nack failed
             notify.send_email(subject=consts.SBJ_NACK_FAILED,
@@ -62,13 +83,15 @@ def main():
 
     env = args.env or os.getenv(consts.ENV_VAR_APP, default=consts.ENV_DEV)
 
+    configure_logging(env)
+
     if env not in (consts.ENV_DEV, consts.ENV_TEST, consts.ENV_STAGING, consts.ENV_PROD):
         raise ValueError('Unrecognised environment: {!r}'.format(env))
 
     # Get the config for this environment
     config_file_path = '{!s}/{!s}/{!s}.cfg'.format(os.path.dirname(os.path.realpath(__file__)),
                                                    consts.PATH_CONFIG, env)
-    print('Using: {!s}'.format(config_file_path))
+    logger.info('Using: {!s}'.format(config_file_path))
 
     # Get the config
     config = Config(config_file_path)
@@ -76,8 +99,8 @@ def main():
     # Daemonize the script
     with DaemonContext(
             working_directory=os.getcwd(),
-            stdout=open(config.process.log_file, 'w'),
-            stderr=open(config.process.error_log, 'w'),
+            stdout=open(config.process.stdout_log, 'w'),
+            stderr=open(config.process.stderr_log, 'w'),
             pidfile=pidfile.PIDLockFile(config.process.pidfile)):
 
         on_message_partial = partial(on_message, env=env, config=config)
@@ -102,7 +125,7 @@ def main():
             # Configure a basic consumer
             channel.basic_consume(on_message_partial, config.broker.queue)
             try:
-                print('Listening on queue: {!s}...'.format(config.broker.queue))
+                logger.info('Listening on queue: {!s}...'.format(config.broker.queue))
                 channel.start_consuming()
             finally:
                 channel.stop_consuming()
