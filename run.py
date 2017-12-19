@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 def configure_logging(env):
-    logging_config_path = '{!s}/{!s}/logging.yml'.format(
+    logging_config_path = '{!s}/{!s}/logging_{!s}.yml'.format(
         os.path.dirname(os.path.realpath(__file__)),
-        consts.PATH_CONFIG)
+        consts.PATH_CONFIG,
+        env)
     with open(logging_config_path) as stream:
         try:
             config_file = yaml.load(stream)
