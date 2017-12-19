@@ -108,20 +108,11 @@ def main():
         credentials = pika.PlainCredentials(config.broker.user, config.broker.password)
         parameters = pika.ConnectionParameters(host=config.broker.host,
                                                port=config.broker.port,
+                                               virtual_host=config.broker.virtual_host,
                                                credentials=credentials)
         with closing(pika.BlockingConnection(parameters=parameters)) as connection:
             channel = connection.channel()
-            # Declare the exchage (create it if it does not yet exist)
-            # Currently not sure who should create the exchange and bindings etc. should each
-            #   producer and the consumers assume they have been created? Should the consumers
-            #   create if they do not yet exist?
-            channel.exchange_declare(exchange=config.broker.exchange,
-                                     exchange_type=config.broker.exchange_type,
-                                     durable=True)
-            # Declare the queue - not sure if it should happen here...
-            channel.queue_declare(queue=config.broker.queue, durable=True)
-            # Bind the queue to the exchange
-            channel.queue_bind(queue=config.broker.queue, exchange=config.broker.exchange)
+            # Exchanges and queues are created using configuration and not at run-time
             # Configure a basic consumer
             channel.basic_consume(on_message_partial, config.broker.queue)
             try:
