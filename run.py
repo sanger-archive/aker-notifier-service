@@ -115,7 +115,9 @@ def main():
             channel = connection.channel()
             # Exchanges and queues are created using configuration and not at run-time
             # Configure a basic consumer
-            channel.basic_consume(on_message_partial, config.broker.queue)
+            channel.basic_consume(consumer_callback=on_message_partial,
+                                  queue=config.broker.queue,
+                                  consumer_tag='aker-events-notifier')
             try:
                 logger.info('Listening on queue: {!s}...'.format(config.broker.queue))
                 channel.start_consuming()

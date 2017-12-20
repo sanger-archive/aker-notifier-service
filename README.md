@@ -1,5 +1,5 @@
 # Aker - events notifier
-[![Build Status](https://travis-ci.org/pjvv/aker-events-notifier.svg?branch=devel)](https://travis-ci.org/pjvv/aker-events-notifier)
+[![Build Status](https://travis-ci.org/sanger/aker-events-notifier.svg?branch=devel)](https://travis-ci.org/sanger/aker-events-notifier)
 
 This application acts as a worker (or consumer) on the `aker.events.notifications` queue and sends
 notifications (only emails at this time) upon receiving an event.

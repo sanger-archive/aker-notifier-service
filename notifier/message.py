@@ -55,6 +55,11 @@ class Message:
         data = json.loads(message_as_json)
         data['timestamp'] = dateutil.parser.parse(data['timestamp'])
 
+        # Currently we don't care for all of the properties in the event
+        data.pop('lims_id', None)
+        data.pop('uuid', None)
+        data.pop('roles', None)
+
         return cls(**data)
 
     def __repr__(self):

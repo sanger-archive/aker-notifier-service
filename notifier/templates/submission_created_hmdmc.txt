@@ -3,7 +3,7 @@
 {% block content %}
 Material Submission {{ submission_id }} has been created by {{ user_identifier }} and contains HMDMC numbers requiring verification.
 
-{% for hmdmc in hmdmc_numbers %}
+{% for hmdmc in hmdmc_list %}
 {{ hmdmc }}
 {% endfor %}
 
