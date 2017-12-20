@@ -77,6 +77,23 @@ def on_message(channel, method_frame, header_frame, body, env, config):
 
 
 def main():
+    # Extract arguments from the CLI
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('env', help='environment (e.g. development)', nargs='?', default=None)
+    args = parser.parse_args()
+
+    env = args.env or os.getenv(consts.ENV_VAR_APP, default=consts.ENV_DEV)
+
+    if env not in (consts.ENV_DEV, consts.ENV_TEST, consts.ENV_STAGING, consts.ENV_PROD):
+        raise ValueError('Unrecognised environment: {!r}'.format(env))
+
+    # Get the config for this environment
+    config_file_path = '{!s}/{!s}/{!s}.cfg'.format(os.path.dirname(os.path.realpath(__file__)),
+                                                   consts.PATH_CONFIG, env)
+
+    # Get the config
+    config = Config(config_file_path)
+
     # Daemonize the script
     with DaemonContext(
             working_directory=os.getcwd(),
@@ -84,25 +101,9 @@ def main():
             stderr=open(config.process.stderr_log, 'w'),
             pidfile=pidfile.PIDLockFile(config.process.pidfile)):
 
-        # Extract arguments from the CLI
-        parser = argparse.ArgumentParser(description=__doc__)
-        parser.add_argument('env', help='environment (e.g. development)', nargs='?', default=None)
-        args = parser.parse_args()
-
-        env = args.env or os.getenv(consts.ENV_VAR_APP, default=consts.ENV_DEV)
-
         configure_logging(env)
 
-        if env not in (consts.ENV_DEV, consts.ENV_TEST, consts.ENV_STAGING, consts.ENV_PROD):
-            raise ValueError('Unrecognised environment: {!r}'.format(env))
-
-        # Get the config for this environment
-        config_file_path = '{!s}/{!s}/{!s}.cfg'.format(os.path.dirname(os.path.realpath(__file__)),
-                                                       consts.PATH_CONFIG, env)
         logger.info('Using: {!s}'.format(config_file_path))
-
-        # Get the config
-        config = Config(config_file_path)
 
         on_message_partial = partial(on_message, env=env, config=config)
 
