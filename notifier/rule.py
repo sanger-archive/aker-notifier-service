@@ -26,6 +26,10 @@ class Rule:
             self._on_work_order_submitted()
         elif self._message.event_type == EVENT_WO_COMPLETED:
             self._on_work_order_completed()
+        elif self._message.event_type == EVENT_CAT_NEW:
+            self._on_catalogue_new()
+        elif self._message.event_type == EVENT_CAT_PROCESSED:
+            self._on_catalogue_processed()
         elif self._message.event_type == EVENT_CAT_PROBLEMATIC:
             self._on_catalogue_problematic()
         else:
@@ -89,6 +93,26 @@ class Rule:
                                 to=to,
                                 template='wo_completed',
                                 data=data)
+
+    def _on_catalogue_new(self):
+        """Send a notification if a new catalogue is available."""
+        logger.debug("_on_catalogue_new triggered")
+        to = self._common_catalogue()
+        self._notify.send_email(subject=SBJ_CAT_NEW,
+                                from_address=self._config.email.from_address,
+                                to=to,
+                                template='catalogue_new',
+                                data={})
+
+    def _on_catalogue_processed(self):
+        """Send a notification if the catalogue received has been processed."""
+        logger.debug("_on_catalogue_processed triggered")
+        to = self._common_catalogue()
+        self._notify.send_email(subject=SBJ_CAT_PROCESSED,
+                                from_address=self._config.email.from_address,
+                                to=to,
+                                template='catalogue_processed',
+                                data={})
 
     def _on_catalogue_problematic(self):
         """Send a notification if the catalogue received is problematic."""
