@@ -18,6 +18,7 @@ EVENT_SUB_CREATED = 'aker.events.submission.created'
 EVENT_SUB_RECEIVED = 'aker.events.submission.received'
 EVENT_WO_SUBMITTED = 'aker.events.work_order.submitted'
 EVENT_WO_COMPLETED = 'aker.events.work_order.completed'
+EVENT_CAT_PROBLEMATIC = 'aker.events.catalogue.problematic'
 
 # Email subjects
 SBJ_SUB_CREATED = 'Aker - Submission created'
@@ -27,3 +28,4 @@ SBJ_WO_SUBMITTED = 'Aker - Work order submitted'
 SBJ_WO_COMPLETED = 'Aker - Work order completed'
 SBJ_MSG_FAILED = 'Aker - Notification failure'
 SBJ_NACK_FAILED = 'Aker - NACK failure'
+SBJ_CAT_PROBLEMATIC = 'Aker - Catalogue received is problematic'
