@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="style.css" />
+    {% endblock %}
+</head>
+<body>
+    Good day,<br><br>
+
+    <div id="content">{% block content %}{% endblock %}</div>
+
+    <br>
+    Regards,<br>
+    Aker
+    <div id="footer">
+        {% block footer %}
+        {% endblock %}
+    </div>
+</body>
+</html>

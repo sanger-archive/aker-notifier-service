@@ -52,6 +52,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.log.*
 local_settings.py
 
 # Flask stuff:
@@ -71,7 +72,7 @@ target/
 .ipynb_checkpoints
 
 # pyenv
-.python-version
+# .python-version
 
 # celery beat schedule file
 celerybeat-schedule
@@ -99,3 +100,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# PIDs
+*.pid

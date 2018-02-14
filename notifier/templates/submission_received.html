@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .important { color: #336699; }
+        table { border-collapse: collapse; }
+        /*table, th, td { border: 1px solid black; }*/
+        th, td { padding: 8px; }
+        th { text-align: left; }
+    </style>
+{% endblock %}
+{% block content %}
+    <p>
+      We've just received the following material mailed to you:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Submission</th>
+          <th>Barcode</th>
+          <th>Created at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ submission_id }}</td>
+          <td>{{ barcode }}</td>
+          <td>{{ created_at }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+    {% if all_received %}
+    All labware for <a href="{{ link }}">Material Submission {{ submission_id }}</a> has now arrived.
+    {% endif %}
+    </p>
+{% endblock %}

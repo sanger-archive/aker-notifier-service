@@ -1,0 +1,6 @@
+Good day,
+
+{% block content %}{% endblock %}
+
+Regards,
+Aker

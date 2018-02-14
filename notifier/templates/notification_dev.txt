@@ -1,0 +1,8 @@
+{% extends "base.txt" %}
+{% block content %}
+The following message failed to be processed in the Aker events notifier.
+
+{{ message }}
+
+{{ traceback }}
+{% endblock %}
