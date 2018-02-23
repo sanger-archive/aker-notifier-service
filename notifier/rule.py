@@ -22,6 +22,8 @@ class Rule:
             self._on_work_order_submitted()
         elif self._message.event_type == EVENT_WO_COMPLETED:
             self._on_work_order_completed()
+        elif self._message.event_type == EVENT_CAT_REJECTED:
+            self._on_catalogue_rejected()
         else:
             pass
 
@@ -78,6 +80,18 @@ class Rule:
                                 from_address=self._config.email.from_address,
                                 to=to,
                                 template='wo_completed',
+                                data=data)
+
+    def _on_catalogue_rejected(self):
+        """Notify when a catalogue has been rejected."""
+        data = {}
+        if 'error' in self._message.metadata and self._message.metadata['error']:
+            data['error'] = self._message.metadata['error']
+            data['timestamp'] = self._message.timestamp
+        self._notify.send_email(subject=SBJ_CAT_REJECTED,
+                                from_address=self._config.email.from_address,
+                                to=[self._config.contact.email_dev_team],
+                                template='catalogue_rejected',
                                 data=data)
 
     def _common_submission(self):
