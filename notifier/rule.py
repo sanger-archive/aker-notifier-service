@@ -60,11 +60,11 @@ class Rule:
         """Notify once a submission has been received."""
         logger.debug("_on_submission_received triggered")
         to, data, link = self._common_submission()
-        if 'barcode' in self._message.metadata and self._message.metadata['barcode']:
+        if self._message.metadata.get('barcode'):
             data['barcode'] = self._message.metadata['barcode']
-        if 'created_at' in self._message.metadata and self._message.metadata['created_at']:
+        if self._message.metadata.get('created_at'):
             data['created_at'] = self._message.metadata['created_at']
-        if 'all_received' in self._message.metadata and self._message.metadata['all_received']:
+        if self._message.metadata.get('all_received'):
             data['all_received'] = self._message.metadata['all_received']
         self._notify.send_email(subject=SBJ_SUB_RECEIVED,
                                 from_address=self._config.email.from_address,
@@ -130,13 +130,12 @@ class Rule:
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
-        if 'submission_id' in self._message.metadata and self._message.metadata['submission_id']:
+        if self._message.metadata.get('submission_id'):
             data['submission_id'] = self._message.metadata['submission_id']
             link = self._generate_link(PATH_SUBMISSION, self._message.metadata['submission_id'])
             data['link'] = link
         # Add the sample custodian to the to list
-        if ('sample_custodian' in self._message.metadata
-                and self._message.metadata['sample_custodian']):
+        if self._message.metadata.get('sample_custodian'):
             to.append(self._message.metadata['sample_custodian'])
         if 'deputies' in self._message.metadata and self._message.metadata['deputies']:
             for dep in self._message.metadata['deputies']:
@@ -149,7 +148,7 @@ class Rule:
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
-        if 'work_order_id' in self._message.metadata and self._message.metadata['work_order_id']:
+        if self._message.metadata.get('work_order_id'):
             data['work_order_id'] = self._message.metadata['work_order_id']
             link = self._generate_link(PATH_WORK_ORDER, self._message.metadata['work_order_id'])
             data['link'] = link
