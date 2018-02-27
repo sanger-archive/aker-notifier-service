@@ -44,3 +44,9 @@ loggers:
       - file_info
       - file_debug
     level: DEBUG
+  notifier.rule:
+    handlers:
+      - file_error
+      - file_info
+      - file_debug
+    level: DEBUG
