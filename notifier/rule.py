@@ -116,6 +116,7 @@ class Rule:
 
     def _on_catalogue_rejected(self):
         """Notify when a catalogue has been rejected."""
+        logger.debug("_on_catalogue_rejected triggered")
         data = {}
         if self._message.metadata.get('error'):
             data['error'] = self._message.metadata['error']
