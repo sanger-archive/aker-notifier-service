@@ -30,8 +30,8 @@ class Rule:
             self._on_catalogue_new()
         elif self._message.event_type == EVENT_CAT_PROCESSED:
             self._on_catalogue_processed()
-        elif self._message.event_type == EVENT_CAT_PROBLEMATIC:
-            self._on_catalogue_problematic()
+        elif self._message.event_type == EVENT_CAT_REJECTED:
+            self._on_catalogue_rejected()
         else:
             pass
 
@@ -114,15 +114,17 @@ class Rule:
                                 template='catalogue_processed',
                                 data={})
 
-    def _on_catalogue_problematic(self):
-        """Send a notification if the catalogue received is problematic."""
-        logger.debug("_on_catalogue_problematic triggered")
-        to = self._common_catalogue()
-        self._notify.send_email(subject=SBJ_CAT_PROBLEMATIC,
+    def _on_catalogue_rejected(self):
+        """Notify when a catalogue has been rejected."""
+        data = {}
+        if self._message.metadata.get('error'):
+            data['error'] = self._message.metadata['error']
+            data['timestamp'] = self._message.timestamp
+        self._notify.send_email(subject=SBJ_CAT_REJECTED,
                                 from_address=self._config.email.from_address,
-                                to=to,
-                                template='catalogue_problematic',
-                                data={})
+                                to=[self._config.contact.email_dev_team],
+                                template='catalogue_rejected',
+                                data=data)
 
     def _common_submission(self):
         """Extract the common info for submission events."""

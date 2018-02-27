@@ -20,7 +20,7 @@ EVENT_WO_SUBMITTED = 'aker.events.work_order.submitted'
 EVENT_WO_COMPLETED = 'aker.events.work_order.completed'
 EVENT_CAT_NEW = 'aker.events.catalogue.new'
 EVENT_CAT_PROCESSED = 'aker.events.catalogue.processed'
-EVENT_CAT_PROBLEMATIC = 'aker.events.catalogue.problematic'
+EVENT_CAT_REJECTED = 'aker.events.catalogue.rejected'
 
 # Email subjects
 SBJ_SUB_CREATED = 'Aker - Submission Created'
