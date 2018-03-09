@@ -47,7 +47,7 @@ class Rule:
                                 template='submission_created',
                                 data=data)
         # Send an email to the ethics officer
-        if 'hmdmc' in self._message.metadata and self._message.metadata['hmdmc']:
+        if self._message.get('hmdmc'):
             data['hmdmc_list'] = self._message.metadata['hmdmc']
             # Use the same link we have already created for the submission
             self._notify.send_email(subject=SBJ_SUB_CREATED_HMDMC,
@@ -140,7 +140,7 @@ class Rule:
         # Add the sample custodian to the to list
         if self._message.metadata.get('sample_custodian'):
             to.append(self._message.metadata['sample_custodian'])
-        if 'deputies' in self._message.metadata and self._message.metadata['deputies']:
+        if self._message.metadata.get('deputies'):
             for dep in self._message.metadata['deputies']:
                 to.append(dep)
         return to, data, link
