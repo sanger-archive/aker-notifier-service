@@ -47,7 +47,7 @@ class Rule:
                                 template='submission_created',
                                 data=data)
         # Send an email to the ethics officer
-        if self._message.get('hmdmc'):
+        if self._message.metadata.get('hmdmc'):
             data['hmdmc_list'] = self._message.metadata['hmdmc']
             # Use the same link we have already created for the submission
             self._notify.send_email(subject=SBJ_SUB_CREATED_HMDMC,
