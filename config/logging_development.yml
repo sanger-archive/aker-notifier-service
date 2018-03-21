@@ -2,7 +2,7 @@ version: 1
 disable_existing_loggers: True
 formatters:
   simple:
-    format: '{asctime} - {levelname} - {name} >> {message}'
+    format: '{asctime} {levelname} {name} {message}'
     style: '{'
 handlers:
   console:
@@ -20,6 +20,7 @@ handlers:
 loggers:
   __main__:
     handlers:
+      - console
       - file_debug
     level: DEBUG
   notifier.notify:
