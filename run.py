@@ -48,7 +48,6 @@ def on_message(channel, method_frame, header_frame, body, env, config):
         # We need to decode the body to be able to read the JSON
         decoded_body = body.decode('utf-8')
         message = Message.from_json(decoded_body)
-        logger.debug('message: {!s}'.format(message))
         rule = Rule(env=env, config=config, message=message)
         rule.check_rules()
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)

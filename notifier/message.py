@@ -5,7 +5,7 @@ import json
 class Message:
     """Represent a message sent from an Aker application or service."""
 
-    def __init__(self, event_type, timestamp, user_identifier, metadata):
+    def __init__(self, event_type, timestamp, user_identifier, metadata, notifier_info):
         """Init the message class.
 
         Args:
@@ -13,11 +13,13 @@ class Message:
             timestamp: time of the event
             user_identifier: the user performing this event
             metadata: metadata of the event
+            notifier_info: info specifically for the notifier from an app
         """
         self._event_type = event_type
         self._timestamp = timestamp
         self._user_identifier = user_identifier
         self._metadata = metadata
+        self._notifier_info = notifier_info
 
     @property
     def event_type(self):
@@ -33,6 +35,11 @@ class Message:
     def metadata(self):
         """The metadata linked to this event."""
         return self._metadata
+
+    @property
+    def notifier_info(self):
+        """The notifier_info for this event."""
+        return self._notifier_info
 
     @property
     def user_identifier(self):
@@ -59,6 +66,10 @@ class Message:
         data.pop('lims_id', None)
         data.pop('uuid', None)
         data.pop('roles', None)
+
+        # Stub out notifier_info if we have not received any
+        if not data.get('notifier_info'):
+            data['notifier_info'] = ''
 
         return cls(**data)
 
