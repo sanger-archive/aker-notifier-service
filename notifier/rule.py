@@ -177,5 +177,5 @@ class Rule:
                                             self._config.link.root,
                                             self._config.link.port,
                                             PATH_WORK_ORDER_BEGIN,
-                                            PATH_WORK_ORDER_END,
-                                            work_plan_id)
+                                            work_plan_id,
+                                            PATH_WORK_ORDER_END)
