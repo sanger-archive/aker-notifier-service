@@ -6,6 +6,6 @@
     </style>
 {% endblock %}
 {% block content %}
-    <a href="{{ link }}">Work order {{ work_order_id }}</a> has been submitted by
-    <a href="mailto:{{ user_identifier }}" target="_top">{{ user_identifier }}</a>.
+    <p>Catalogue Rejected with: "{{ error }}"</p>
+    <p>Event generated at {{ timestamp }}</p>
 {% endblock %}

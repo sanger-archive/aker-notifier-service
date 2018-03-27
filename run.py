@@ -45,8 +45,9 @@ def on_message(channel, method_frame, header_frame, body, env, config):
     try:
         logger.info('Processing message: {!s}'.format(method_frame.delivery_tag))
         logger.debug('Message body: {!s}'.format(body))
-        message = Message.from_json(body)
-        logger.debug('message: {!s}'.format(message))
+        # We need to decode the body to be able to read the JSON
+        decoded_body = body.decode('utf-8')
+        message = Message.from_json(decoded_body)
         rule = Rule(env=env, config=config, message=message)
         rule.check_rules()
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
@@ -97,8 +98,8 @@ def main():
     # Daemonize the script
     with DaemonContext(
             working_directory=os.getcwd(),
-            stdout=open(config.process.stdout_log, 'w'),
-            stderr=open(config.process.stderr_log, 'w'),
+            stdout=open(config.process.stdout_log, 'a'),
+            stderr=open(config.process.stderr_log, 'a'),
             pidfile=pidfile.PIDLockFile(config.process.pidfile)):
 
         configure_logging(env)

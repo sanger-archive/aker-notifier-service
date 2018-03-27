@@ -1,0 +1,5 @@
+{% extends "base.txt" %}
+{% block content %}
+The following catalogue has been processed in Aker work orders.
+
+{% endblock %}

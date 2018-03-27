@@ -1,0 +1,6 @@
+{% extends "base.txt" %}
+
+{% block content %}
+Catalogue Rejected: "{{ error }}"
+Event generated at {{ timestamp }}
+{% endblock %}
