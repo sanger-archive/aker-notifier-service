@@ -153,7 +153,8 @@ class Rule:
         # Check if we can create a link
         if self._message.metadata.get('work_order_id'):
             data['work_order_id'] = self._message.metadata['work_order_id']
-            link = self._generate_link(PATH_WORK_ORDER, self._message.metadata['work_order_id'])
+            # We want the work plan id for the link
+            link = self._generate_wo_link(self._message._notifier_info['work_plan_id'])
             data['link'] = link
         return to, data, link
 
@@ -169,3 +170,12 @@ class Rule:
                                          self._config.link.port,
                                          path,
                                          id)
+
+    def _generate_wo_link(self, work_plan_id):
+        """Generate a link to the specific entity in the work orders app."""
+        return '{}://{}:{}/{}/{}/{}'.format(self._config.link.protocol,
+                                            self._config.link.root,
+                                            self._config.link.port,
+                                            PATH_WORK_ORDER_BEGIN,
+                                            work_plan_id,
+                                            PATH_WORK_ORDER_END)

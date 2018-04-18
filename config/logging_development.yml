@@ -2,51 +2,32 @@ version: 1
 disable_existing_loggers: True
 formatters:
   simple:
-    format: '{asctime} - {levelname} - {name} >> {message}'
+    format: '{asctime} {levelname} {name} {message}'
     style: '{'
 handlers:
   console:
     level: DEBUG
     class: logging.StreamHandler
     formatter: simple
-  file_error:
-    level: ERROR
-    class: logging.handlers.RotatingFileHandler
-    mode: a
-    formatter: simple
-    filename: logs/notifier_error.log
-    maxBytes: 1024
-    backupCount: 3
-  file_info:
-    level: INFO
-    class: logging.handlers.RotatingFileHandler
-    mode: a
-    formatter: simple
-    filename: logs/notifier_info.log
-    maxBytes: 1024
-    backupCount: 3
   file_debug:
     level: DEBUG
-    class: logging.FileHandler
+    class: logging.handlers.RotatingFileHandler
     mode: w
     formatter: simple
     filename: logs/notifier_debug.log
+    maxBytes: 5242880
+    backupCount: 3
 loggers:
   __main__:
     handlers:
-      - file_error
-      - file_info
+      - console
       - file_debug
     level: DEBUG
   notifier.notify:
     handlers:
-      - file_error
-      - file_info
       - file_debug
     level: DEBUG
   notifier.rule:
     handlers:
-      - file_error
-      - file_info
       - file_debug
     level: DEBUG
