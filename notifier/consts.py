@@ -10,7 +10,7 @@ ENV_PROD = 'production'
 
 # Paths
 PATH_CONFIG = 'config'
-PATH_SUBMISSION = 'submission/material_submissions'
+PATH_SUBMISSION = 'reception/material_submissions'
 PATH_WORK_ORDER_BEGIN = 'work-orders/work_plans'
 PATH_WORK_ORDER_END = 'build/dispatch'
 
