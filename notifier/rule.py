@@ -24,7 +24,7 @@ class Rule:
             self._on_submission_received()
         elif self._message.event_type == EVENT_WO_SUBMITTED:
             self._on_work_order_submitted()
-        elif self._message.event_type == EVENT_WO_COMPLETED:
+        elif self._message.event_type == EVENT_WO_CONCLUDED:
             self._on_work_order_completed()
         elif self._message.event_type == EVENT_CAT_NEW:
             self._on_catalogue_new()
