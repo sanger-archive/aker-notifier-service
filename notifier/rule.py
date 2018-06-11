@@ -22,6 +22,8 @@ class Rule:
             self._on_submission_create()
         elif self._message.event_type == EVENT_SUB_RECEIVED:
             self._on_submission_received()
+        elif self._message.event_type == EVENT_WO_QUEUED:
+            self._on_work_order_queued()
         elif self._message.event_type == EVENT_WO_SUBMITTED:
             self._on_work_order_submitted()
         elif self._message.event_type == EVENT_WO_CONCLUDED:
@@ -81,6 +83,17 @@ class Rule:
                                 from_address=self._config.email.from_address,
                                 to=to,
                                 template='wo_submitted',
+                                data=data)
+
+    def _on_work_order_queued(self):
+        """Notify once a work order has been queued."""
+        logger.debug("_on_work_order_queued triggered")
+        to, data, link = self._common_work_order()
+        data['user_identifier'] = self._message.user_identifier
+        self._notify.send_email(subject=SBJ_WO_QUEUED,
+                                from_address=self._config.email.from_address,
+                                to=to,
+                                template='wo_queued',
                                 data=data)
 
     def _on_work_order_concluded(self):
