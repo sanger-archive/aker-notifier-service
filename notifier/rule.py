@@ -25,7 +25,7 @@ class Rule:
         elif self._message.event_type == EVENT_WO_SUBMITTED:
             self._on_work_order_submitted()
         elif self._message.event_type == EVENT_WO_CONCLUDED:
-            self._on_work_order_completed()
+            self._on_work_order_concluded()
         elif self._message.event_type == EVENT_CAT_NEW:
             self._on_catalogue_new()
         elif self._message.event_type == EVENT_CAT_PROCESSED:
@@ -83,9 +83,9 @@ class Rule:
                                 template='wo_submitted',
                                 data=data)
 
-    def _on_work_order_completed(self):
+    def _on_work_order_concluded(self):
         """Notify once a work order has been completed."""
-        logger.debug("_on_work_order_completed triggered")
+        logger.debug("_on_work_order_concluded triggered")
         to, data, link = self._common_work_order()
         data['user_identifier'] = self._message.user_identifier
         self._notify.send_email(subject=SBJ_WO_COMPLETED,
