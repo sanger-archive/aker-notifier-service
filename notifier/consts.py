@@ -28,14 +28,9 @@ EVENT_CAT_REJECTED = 'aker.events.catalogue.rejected'
 SBJ_SUB_CREATED = 'Aker - Submission Created'
 SBJ_SUB_CREATED_HMDMC = 'Aker - Submission created with HMDMC required'
 SBJ_SUB_RECEIVED = 'Aker - Submission Received'
-SBJ_WO_QUEUED = 'Aker - Work Order Queued'
-SBJ_WO_SUBMITTED = 'Aker - Work Order Dispatched'
-SBJ_WO_COMPLETED = 'Aker - Work Order Concluded'
 SBJ_CAT_REJECTED = 'Aker - Catalogue Rejected'
 SBJ_MSG_FAILED = 'Aker - Notification failure'
 SBJ_NACK_FAILED = 'Aker - NACK failure'
 SBJ_CAT_NEW = 'Aker - New catalogue available'
 SBJ_CAT_PROCESSED = 'Aker - Catalogue processed'
-
-# new constants
 SBJ_PREFIX_WO = "Aker | Work Order"
