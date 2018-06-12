@@ -22,7 +22,7 @@ class Rule:
             self._on_submission_create()
         elif self._message.event_type == EVENT_SUB_RECEIVED:
             self._on_submission_received()
-        elif self._message.event_type in [EVENT_WO_QUEUED, EVENT_WO_SUBMITTED, EVENT_WO_CONCLUDED]:
+        elif self._message.event_type in [EVENT_WO_QUEUED, EVENT_WO_DISPATCHED, EVENT_WO_CONCLUDED]:
             self._on_work_order_event()
         elif self._message.event_type == EVENT_CAT_NEW:
             self._on_catalogue_new()
