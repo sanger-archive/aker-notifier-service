@@ -6,6 +6,6 @@
     </style>
 {% endblock %}
 {% block content %}
-    <a href="{{ link }}">Work Order {{ work_order_id }}</a> has been queued by
+    <a href="{{ link }}">Work Order {{ work_order_id }}</a> has been {{ work_order_status }} by
     <a href="mailto:{{ user_identifier }}" target="_top">{{ user_identifier }}</a>.
 {% endblock %}
