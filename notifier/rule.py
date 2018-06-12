@@ -22,12 +22,8 @@ class Rule:
             self._on_submission_create()
         elif self._message.event_type == EVENT_SUB_RECEIVED:
             self._on_submission_received()
-        elif self._message.event_type == EVENT_WO_QUEUED:
-            self._on_work_order_queued()
-        elif self._message.event_type == EVENT_WO_SUBMITTED:
-            self._on_work_order_submitted()
-        elif self._message.event_type == EVENT_WO_CONCLUDED:
-            self._on_work_order_concluded()
+        elif self._message.event_type in [EVENT_WO_QUEUED, EVENT_WO_DISPATCHED, EVENT_WO_CONCLUDED]:
+            self._on_work_order_event()
         elif self._message.event_type == EVENT_CAT_NEW:
             self._on_catalogue_new()
         elif self._message.event_type == EVENT_CAT_PROCESSED:
@@ -74,37 +70,19 @@ class Rule:
                                 template='submission_received',
                                 data=data)
 
-    def _on_work_order_submitted(self):
+    def _on_work_order_event(self):
         """Notify once a work order has been submitted."""
-        logger.debug("_on_work_order_submitted triggered")
-        to, data, link = self._common_work_order()
+        logger.debug("_on_work_order_event triggered")
+        try:
+            to, data = self._common_work_order()
+        except ValueError as error:
+            logger.error(error.message)
         data['user_identifier'] = self._message.user_identifier
-        self._notify.send_email(subject=SBJ_WO_SUBMITTED,
+        data['work_order_status'] = self._message.event_type.split('.')[-1]
+        self._notify.send_email(subject="{0} {1}".format(SBJ_PREFIX_WO, data['work_order_status'].capitalize()),
                                 from_address=self._config.email.from_address,
                                 to=to,
-                                template='wo_submitted',
-                                data=data)
-
-    def _on_work_order_queued(self):
-        """Notify once a work order has been queued."""
-        logger.debug("_on_work_order_queued triggered")
-        to, data, link = self._common_work_order()
-        data['user_identifier'] = self._message.user_identifier
-        self._notify.send_email(subject=SBJ_WO_QUEUED,
-                                from_address=self._config.email.from_address,
-                                to=to,
-                                template='wo_queued',
-                                data=data)
-
-    def _on_work_order_concluded(self):
-        """Notify once a work order has been completed."""
-        logger.debug("_on_work_order_concluded triggered")
-        to, data, link = self._common_work_order()
-        data['user_identifier'] = self._message.user_identifier
-        self._notify.send_email(subject=SBJ_WO_COMPLETED,
-                                from_address=self._config.email.from_address,
-                                to=to,
-                                template='wo_completed',
+                                template='wo_event',
                                 data=data)
 
     def _on_catalogue_new(self):
@@ -160,16 +138,16 @@ class Rule:
 
     def _common_work_order(self):
         """Extract the common info for work order events."""
-        link = ''
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
         if self._message.metadata.get('work_order_id'):
             data['work_order_id'] = self._message.metadata['work_order_id']
             # We want the work plan id for the link
-            link = self._generate_wo_link(self._message._notifier_info['work_plan_id'])
-            data['link'] = link
-        return to, data, link
+            data['link'] = self._generate_wo_link(self._message._notifier_info['work_plan_id'])
+        else:
+            raise ValueError("Work Order ID not found in metadata dictionary")
+        return to, data
 
     def _common_catalogue(self):
         """Extract the common info for catalogue events."""
