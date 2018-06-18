@@ -1,9 +1,31 @@
+git:
+  depth: false
+  submodules: false
+branches:
+  only:
+    - devel
+    - wip
+    - uat
+    - master
 language: python
 python:
-  - 3.6
+  - 3.6.5
+cache:
+  pip
+env:
+  global:
+    - CC_TEST_REPORTER_ID=66ead661902f8e8594f9e3bc478137e1599105dc668c1cfd869e4d19879d0da5
 # command to install dependencies
 install:
   - pip install -r requirements.txt
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+# command to run tests
 # command to run tests
 script:
-  - nosetests
+  - nosetests --with-coverage
+after_script:
+  - coverage xml
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
