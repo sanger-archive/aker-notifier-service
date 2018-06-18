@@ -1,5 +1,7 @@
-# Aker - events notifier
-[![Build Status](https://travis-ci.org/sanger/aker-events-notifier.svg?branch=devel)](https://travis-ci.org/sanger/aker-events-notifier)
+# Aker - Notifier service
+[![Build Status](https://travis-ci.org/sanger/aker-notifier-service.svg?branch=devel)](https://travis-ci.org/sanger/aker-notifier-service)
+[![Maintainability](https://api.codeclimate.com/v1/badges/3e2445822b8551dfd40e/maintainability)](https://codeclimate.com/github/sanger/aker-notifier-service/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/3e2445822b8551dfd40e/test_coverage)](https://codeclimate.com/github/sanger/aker-notifier-service/test_coverage)
 
 This application acts as a worker (or consumer) on the `aker.events.notifications` queue and sends
 notifications (only emails at this time) upon receiving an event.

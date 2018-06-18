@@ -1,7 +1,7 @@
 {% extends "base.txt" %}
 
 {% block content %}
-Work order {{ work_order_id }} has been submitted by {{ user_identifier }}.
+Work Order {{ work_order_id }} has been {{ work_order_status }} by {{ user_identifier }}.
 
 Please visit {{ link }} to view the work order.
 {% endblock %}
