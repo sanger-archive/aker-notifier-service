@@ -17,7 +17,6 @@ PATH_WORK_ORDER_END = 'build/dispatch'
 # Events
 EVENT_SUB_CREATED = 'aker.events.submission.created'
 EVENT_SUB_RECEIVED = 'aker.events.submission.received'
-EVENT_WO_QUEUED = 'aker.events.work_order.queued'
 EVENT_WO_DISPATCHED = 'aker.events.work_order.dispatched'
 EVENT_WO_CONCLUDED = 'aker.events.work_order.concluded'
 EVENT_CAT_NEW = 'aker.events.catalogue.new'
