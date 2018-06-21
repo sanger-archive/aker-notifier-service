@@ -79,12 +79,16 @@ class Rule:
             logger.error(error.message)
         data['user_identifier'] = self._message.user_identifier
         data['work_order_status'] = self._message.event_type.split('.')[-1]
-        self._notify.send_email(subject="{0} {1}".format(SBJ_PREFIX_WO,
-                                                         data['work_order_status'].capitalize()),
-                                from_address=self._config.email.from_address,
-                                to=to,
-                                template='wo_event',
-                                data=data)
+        self._notify.send_email(
+            subject="{0} {1} [Data release: {2}]".format(
+                SBJ_PREFIX_WO,
+                data['work_order_status'].capitalize(),
+                self._message.notifier_info['work_plan_id'],
+                self._message.notifier_info['drs_study_code']),
+            from_address=self._config.email.from_address,
+            to=to,
+            template='wo_event',
+            data=data)
 
     def _on_catalogue_new(self):
         """Send a notification if a new catalogue is available."""
@@ -144,15 +148,14 @@ class Rule:
         if self._message.metadata.get('work_order_id'):
             data['work_order_id'] = self._message.metadata['work_order_id']
             # We want the work plan id for the link
-            data['link'] = self._generate_wo_link(self._message._notifier_info['work_plan_id'])
+            data['link'] = self._generate_wo_link(self._message.notifier_info['work_plan_id'])
         else:
             raise ValueError("Work Order ID not found in metadata dictionary")
         return to, data
 
     def _common_catalogue(self):
-        """Extract the common info for catalogue events."""
-        to = [self._config.contact.email_dev_team]
-        return to
+        """Extract the common info for catalogue events - currently just dev team email address."""
+        return [self._config.contact.email_dev_team]
 
     def _generate_link(self, path, id):
         """Generate a link to the specific entity in the app provided by path."""
