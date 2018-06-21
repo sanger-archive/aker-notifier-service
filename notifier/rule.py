@@ -83,7 +83,6 @@ class Rule:
             subject="{0} {1} [Data release: {2}]".format(
                 SBJ_PREFIX_WO,
                 data['work_order_status'].capitalize(),
-                self._message.notifier_info['work_plan_id'],
                 self._message.notifier_info['drs_study_code']),
             from_address=self._config.email.from_address,
             to=to,
