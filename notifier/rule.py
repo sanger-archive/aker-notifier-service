@@ -36,7 +36,7 @@ class Rule:
     def _on_submission_create(self):
         """Notify once a submission has been created."""
         logger.debug("_on_submission_create triggered")
-        to, data, link = self._common_submission()
+        to, data = self._common_submission()
         data['user_identifier'] = self._message.user_identifier
         # Send a submission created email
         self._notify.send_email(subject=SBJ_SUB_CREATED,
@@ -57,7 +57,7 @@ class Rule:
     def _on_submission_received(self):
         """Notify once a submission has been received."""
         logger.debug("_on_submission_received triggered")
-        to, data, link = self._common_submission()
+        to, data = self._common_submission()
         if self._message.metadata.get('barcode'):
             data['barcode'] = self._message.metadata['barcode']
         if self._message.metadata.get('created_at'):
@@ -121,21 +121,20 @@ class Rule:
 
     def _common_submission(self):
         """Extract the common info for submission events."""
-        link = ''
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
         if self._message.metadata.get('submission_id'):
             data['submission_id'] = self._message.metadata['submission_id']
-            link = self._generate_link(PATH_SUBMISSION, self._message.metadata['submission_id'])
-            data['link'] = link
+            data['link'] = self._generate_link(PATH_SUBMISSION,
+                                               self._message.metadata['submission_id'])
         # Add the sample custodian to the to list
         if self._message.metadata.get('sample_custodian'):
             to.append(self._message.metadata['sample_custodian'])
         if self._message.metadata.get('deputies'):
             for dep in self._message.metadata['deputies']:
                 to.append(dep)
-        return to, data, link
+        return to, data
 
     def _common_work_order(self):
         """Extract the common info for work order events."""
