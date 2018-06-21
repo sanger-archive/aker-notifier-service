@@ -96,7 +96,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_processed.assert_not_called()
         rule._on_catalogue_rejected.assert_not_called()
 
-    def test_work_order_dispatched_event_triggered(self):
+    def test_work_order_concluded_event_triggered(self):
         message = self.create_fake_generic_message(EVENT_WO_CONCLUDED)
         rule = Rule(env='test', config='test', message=message)
 
@@ -280,7 +280,7 @@ class RulesTests(unittest.TestCase):
     @mock.patch('notifier.rule.Notify', autospec=True)
     def test_on_catalogue_rejected(self, mocked_notify):
         message = self.FakeMessage(
-            event_type=EVENT_WO_DISPATCHED,
+            event_type=EVENT_CAT_REJECTED,
             timestamp=datetime.now().isoformat(),
             user_identifier='test@sanger.ac.uk',
             metadata={'error': 'error message'},
