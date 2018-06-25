@@ -14,7 +14,8 @@ class MessageTests(unittest.TestCase):
                                 timestamp=datetime.now().isoformat(),
                                 user_identifier='test@sanger.ac.uk',
                                 metadata={'sample_custodian': 'sc@sanger.ac.uk'},
-                                notifier_info={'work_plan_id': 1})
+                                notifier_info={'work_plan_id': 1,
+                                               'drs_study_code': 1234})
 
     def test_init(self):
         message = Message(event_type=self._fake_message.event_type,
@@ -39,6 +40,7 @@ class MessageTests(unittest.TestCase):
                     "{}":"{}"
                 }},
                 "notifier_info":{{
+                    "{}":{},
                     "{}":{}
                 }}
             }}'''.format(self._fake_message.event_type,
@@ -47,7 +49,9 @@ class MessageTests(unittest.TestCase):
                          list(self._fake_message.metadata.keys())[0],
                          self._fake_message.metadata['sample_custodian'],
                          list(self._fake_message.notifier_info.keys())[0],
-                         self._fake_message.notifier_info['work_plan_id'])
+                         self._fake_message.notifier_info['work_plan_id'],
+                         list(self._fake_message.notifier_info.keys())[1],
+                         self._fake_message.notifier_info['drs_study_code'])
 
         message = Message.from_json(message_as_json)
         self.assertEqual(message.event_type, self._fake_message.event_type)
