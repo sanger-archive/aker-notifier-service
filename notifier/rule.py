@@ -22,7 +22,7 @@ class Rule:
             self._on_submission_create()
         elif self._message.event_type == EVENT_SUB_RECEIVED:
             self._on_submission_received()
-        elif self._message.event_type in [EVENT_WO_QUEUED, EVENT_WO_DISPATCHED, EVENT_WO_CONCLUDED]:
+        elif self._message.event_type in [EVENT_WO_DISPATCHED, EVENT_WO_CONCLUDED]:
             self._on_work_order_event()
         elif self._message.event_type == EVENT_CAT_NEW:
             self._on_catalogue_new()
@@ -36,7 +36,7 @@ class Rule:
     def _on_submission_create(self):
         """Notify once a submission has been created."""
         logger.debug("_on_submission_create triggered")
-        to, data, link = self._common_submission()
+        to, data = self._common_submission()
         data['user_identifier'] = self._message.user_identifier
         # Send a submission created email
         self._notify.send_email(subject=SBJ_SUB_CREATED,
@@ -57,7 +57,7 @@ class Rule:
     def _on_submission_received(self):
         """Notify once a submission has been received."""
         logger.debug("_on_submission_received triggered")
-        to, data, link = self._common_submission()
+        to, data = self._common_submission()
         if self._message.metadata.get('barcode'):
             data['barcode'] = self._message.metadata['barcode']
         if self._message.metadata.get('created_at'):
@@ -79,11 +79,15 @@ class Rule:
             logger.error(error.message)
         data['user_identifier'] = self._message.user_identifier
         data['work_order_status'] = self._message.event_type.split('.')[-1]
-        self._notify.send_email(subject="{0} {1}".format(SBJ_PREFIX_WO, data['work_order_status'].capitalize()),
-                                from_address=self._config.email.from_address,
-                                to=to,
-                                template='wo_event',
-                                data=data)
+        self._notify.send_email(
+            subject="{0} {1} [Data release: {2}]".format(
+                SBJ_PREFIX_WO,
+                data['work_order_status'].capitalize(),
+                self._message.notifier_info['drs_study_code']),
+            from_address=self._config.email.from_address,
+            to=to,
+            template='wo_event',
+            data=data)
 
     def _on_catalogue_new(self):
         """Send a notification if a new catalogue is available."""
@@ -120,21 +124,20 @@ class Rule:
 
     def _common_submission(self):
         """Extract the common info for submission events."""
-        link = ''
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
         if self._message.metadata.get('submission_id'):
             data['submission_id'] = self._message.metadata['submission_id']
-            link = self._generate_link(PATH_SUBMISSION, self._message.metadata['submission_id'])
-            data['link'] = link
+            data['link'] = self._generate_link(PATH_SUBMISSION,
+                                               self._message.metadata['submission_id'])
         # Add the sample custodian to the to list
         if self._message.metadata.get('sample_custodian'):
             to.append(self._message.metadata['sample_custodian'])
         if self._message.metadata.get('deputies'):
             for dep in self._message.metadata['deputies']:
                 to.append(dep)
-        return to, data, link
+        return to, data
 
     def _common_work_order(self):
         """Extract the common info for work order events."""
@@ -144,15 +147,14 @@ class Rule:
         if self._message.metadata.get('work_order_id'):
             data['work_order_id'] = self._message.metadata['work_order_id']
             # We want the work plan id for the link
-            data['link'] = self._generate_wo_link(self._message._notifier_info['work_plan_id'])
+            data['link'] = self._generate_wo_link(self._message.notifier_info['work_plan_id'])
         else:
             raise ValueError("Work Order ID not found in metadata dictionary")
         return to, data
 
     def _common_catalogue(self):
-        """Extract the common info for catalogue events."""
-        to = [self._config.contact.email_dev_team]
-        return to
+        """Extract the common info for catalogue events - currently just dev team email address."""
+        return [self._config.contact.email_dev_team]
 
     def _generate_link(self, path, id):
         """Generate a link to the specific entity in the app provided by path."""

@@ -1,5 +1,5 @@
 # aker-events-notifier
-FROM python:3.6.3
+FROM python:3.6.5
 
 # Needed to see log output immediately
 ENV PYTHONUNBUFFERED 1
