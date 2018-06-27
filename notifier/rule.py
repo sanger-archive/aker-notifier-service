@@ -80,7 +80,7 @@ class Rule:
         data['user_identifier'] = self._message.user_identifier
         data['work_order_status'] = self._message.event_type.split('.')[-1]
         self._notify.send_email(
-            subject="{0} {1} [Data release: {2}]".format(
+            subject="{0} {1} [Data release:{2}]".format(
                 SBJ_PREFIX_WO,
                 data['work_order_status'].capitalize(),
                 self._message.notifier_info['drs_study_code']),

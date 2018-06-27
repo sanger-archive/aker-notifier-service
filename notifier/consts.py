@@ -32,4 +32,4 @@ SBJ_MSG_FAILED = 'Aker | Notification failure'
 SBJ_NACK_FAILED = 'Aker | NACK failure'
 SBJ_CAT_NEW = 'Aker | New catalogue available'
 SBJ_CAT_PROCESSED = 'Aker | Catalogue processed'
-SBJ_PREFIX_WO = "Aker | Work Order"
+SBJ_PREFIX_WO = 'Aker | Work Order'
