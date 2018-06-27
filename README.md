@@ -13,6 +13,10 @@ To install all the required packages, execute `pip install -r requirements.txt`
 To run all the tests, execute `nosetests --rednose` from the root directory.
 
 # Misc.
+## Useful links
+[This](https://gist.github.com/jriguera/f3191528b7676bd60af5) gist was very helpful.
+
+## Messages
 Below are a few messages which can be manipulated and used during testing:
 ## aker.events.submission.created
 ```json
