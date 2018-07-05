@@ -3,11 +3,11 @@
 {% block content %}
 We've just received the following material mailed to you:
 
-Submission: {{ submission_id }}
+Manifest: {{ manifest_id }}
 Barcode: {{ barcode }}
 Created at: {{ created_at }}
 
 {% if all_received %}
-All labware for Submission 344 has now arrived: {{ link }}
+All material for Submission 344 has now arrived: {{ link }}
 {% endif %}
 {% endblock %}
