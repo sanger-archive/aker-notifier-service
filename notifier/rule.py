@@ -19,7 +19,7 @@ class Rule:
     def check_rules(self):
         """Check all the rules for the current message (event)."""
         if self._message.event_type == EVENT_MAN_CREATED:
-            self._on_submission_create()
+            self._on_manifest_create()
         elif self._message.event_type == EVENT_MAN_RECEIVED:
             self._on_manifest_received()
         elif self._message.event_type in [EVENT_WO_DISPATCHED, EVENT_WO_CONCLUDED]:
@@ -33,12 +33,12 @@ class Rule:
         else:
             pass
 
-    def _on_submission_create(self):
-        """Notify once a submission has been created."""
-        logger.debug("_on_submission_create triggered")
-        to, data = self._common_submission()
+    def _on_manifest_create(self):
+        """Notify once a manifest has been created."""
+        logger.debug("_on_manifest_create triggered")
+        to, data = self._common_manifest()
         data['user_identifier'] = self._message.user_identifier
-        # Send a submission created email
+        # Send a manifest created email
         self._notify.send_email(subject=SBJ_MAN_CREATED,
                                 from_address=self._config.email.from_address,
                                 to=to,
@@ -47,7 +47,7 @@ class Rule:
         # Send an email to the ethics officer
         if self._message.metadata.get('hmdmc'):
             data['hmdmc_list'] = self._message.metadata['hmdmc']
-            # Use the same link we have already created for the submission
+            # Use the same link we have already created for the manifest
             self._notify.send_email(subject=SBJ_MAN_CREATED_HMDMC,
                                     from_address=self._config.email.from_address,
                                     to=[self._config.contact.email_hmdmc_verify],
@@ -55,9 +55,9 @@ class Rule:
                                     data=data)
 
     def _on_manifest_received(self):
-        """Notify once a submission has been received."""
+        """Notify once material for a manifest has been received."""
         logger.debug("_on_manifest_received triggered")
-        to, data = self._common_submission()
+        to, data = self._common_manifest()
         if self._message.metadata.get('barcode'):
             data['barcode'] = self._message.metadata['barcode']
         if self._message.metadata.get('created_at'):
@@ -122,14 +122,14 @@ class Rule:
                                 template='catalogue_rejected',
                                 data=data)
 
-    def _common_submission(self):
-        """Extract the common info for submission events."""
+    def _common_manifest(self):
+        """Extract the common info for manifest events."""
         data = {}
         to = [self._message.user_identifier]
         # Check if we can create a link
         if self._message.metadata.get('manifest_id'):
             data['manifest_id'] = self._message.metadata['manifest_id']
-            data['link'] = self._generate_link(PATH_SUBMISSION,
+            data['link'] = self._generate_link(PATH_RECEPTION,
                                                self._message.metadata['manifest_id'])
         # Add the sample custodian to the to list
         if self._message.metadata.get('sample_custodian'):

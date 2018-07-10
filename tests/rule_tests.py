@@ -36,11 +36,11 @@ class RulesTests(unittest.TestCase):
         self.assertEqual(rule._message, self._fake_message)
         self.assertIsInstance(rule._notify, Notify)
 
-    def test_submission_create_triggered(self):
+    def test_manifest_create_triggered(self):
         message = self.create_fake_generic_message(EVENT_MAN_CREATED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -49,7 +49,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_called_once()
+        rule._on_manifest_create.assert_called_once()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_not_called()
         rule._on_catalogue_new.assert_not_called()
@@ -60,7 +60,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_MAN_RECEIVED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -69,7 +69,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_called_once()
         rule._on_work_order_event.assert_not_called()
         rule._on_catalogue_new.assert_not_called()
@@ -80,7 +80,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_WO_DISPATCHED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -89,7 +89,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_called_once()
         rule._on_catalogue_new.assert_not_called()
@@ -100,7 +100,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_WO_CONCLUDED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -109,7 +109,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_called_once()
         rule._on_catalogue_new.assert_not_called()
@@ -120,7 +120,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_CAT_NEW)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -129,7 +129,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_not_called()
         rule._on_catalogue_new.assert_called_once()
@@ -140,7 +140,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_CAT_PROCESSED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -149,7 +149,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_not_called()
         rule._on_catalogue_new.assert_not_called()
@@ -160,7 +160,7 @@ class RulesTests(unittest.TestCase):
         message = self.create_fake_generic_message(EVENT_CAT_REJECTED)
         rule = Rule(env='test', config='test', message=message)
 
-        rule._on_submission_create = Mock()
+        rule._on_manifest_create = Mock()
         rule._on_manifest_received = Mock()
         rule._on_work_order_event = Mock()
         rule._on_catalogue_new = Mock()
@@ -169,7 +169,7 @@ class RulesTests(unittest.TestCase):
 
         rule.check_rules()
 
-        rule._on_submission_create.assert_not_called()
+        rule._on_manifest_create.assert_not_called()
         rule._on_manifest_received.assert_not_called()
         rule._on_work_order_event.assert_not_called()
         rule._on_catalogue_new.assert_not_called()
@@ -177,7 +177,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_called_once()
 
     @mock.patch('notifier.rule.Notify', autospec=True)
-    def test_submission_create_email(self, mocked_notify):
+    def test_manifest_create_email(self, mocked_notify):
         message = self.create_fake_generic_message(EVENT_MAN_CREATED)
         rule = Rule(env='test', config=config, message=message)
         rule.check_rules()
@@ -217,7 +217,7 @@ class RulesTests(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             rule._common_work_order()
 
-    def test_common_submission_with_id(self):
+    def test_common_manifest_with_id(self):
         message = self.FakeMessage(
             event_type=EVENT_MAN_RECEIVED,
             timestamp=datetime.now().isoformat(),
@@ -230,7 +230,7 @@ class RulesTests(unittest.TestCase):
         rule._generate_link = Mock()
         rule._generate_link.return_value = ''
 
-        to, data = rule._common_submission()
+        to, data = rule._common_manifest()
 
         self.assertEqual(to, [message.user_identifier,
                               message.metadata['sample_custodian'],
@@ -308,14 +308,14 @@ class RulesTests(unittest.TestCase):
         rule._common_work_order.assert_called_once()
 
     @mock.patch('notifier.rule.Notify')
-    def test_common_submission_called(self, mocked_notify):
+    def test_common_manifest_called(self, mocked_notify):
         message = self.create_fake_generic_message(EVENT_MAN_RECEIVED)
         rule = Rule(env='test', config=config, message=message)
-        rule._common_submission = Mock()
-        rule._common_submission.return_value = [], {}
+        rule._common_manifest = Mock()
+        rule._common_manifest.return_value = [], {}
         rule.check_rules()
 
-        rule._common_submission.assert_called_once()
+        rule._common_manifest.assert_called_once()
 
     def test_common_catalogue(self):
         rule = Rule(env='test', config=config, message='')
