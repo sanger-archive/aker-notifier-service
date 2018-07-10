@@ -16,14 +16,14 @@
     <table>
       <thead>
         <tr>
-          <th>Submission</th>
+          <th>Manifest</th>
           <th>Barcode</th>
           <th>Created at</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>{{ submission_id }}</td>
+          <td>{{ manifest_id }}</td>
           <td>{{ barcode }}</td>
           <td>{{ created_at }}</td>
         </tr>
@@ -31,7 +31,7 @@
     </table>
     <p>
     {% if all_received %}
-    All labware for <a href="{{ link }}">Material Submission {{ submission_id }}</a> has now arrived.
+    All material for <a href="{{ link }}">Manifest {{ manifest_id }}</a> has now arrived.
     {% endif %}
     </p>
 {% endblock %}
