@@ -8,6 +8,6 @@ Barcode: {{ barcode }}
 Created at: {{ created_at }}
 
 {% if all_received %}
-All material for Submission 344 has now arrived: {{ link }}
+All material for Manifest {{ manifest_id }} has now arrived: {{ link }}
 {% endif %}
 {% endblock %}
