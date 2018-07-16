@@ -10,7 +10,7 @@ class MessageTests(unittest.TestCase):
 
     FakeMessage = namedtuple('FakeMessage',
                              'event_type timestamp user_identifier metadata notifier_info')
-    _fake_message = FakeMessage(event_type=consts.EVENT_SUB_CREATED,
+    _fake_message = FakeMessage(event_type=consts.EVENT_MAN_CREATED,
                                 timestamp=datetime.now().isoformat(),
                                 user_identifier='test@sanger.ac.uk',
                                 metadata={'sample_custodian': 'sc@sanger.ac.uk'},
