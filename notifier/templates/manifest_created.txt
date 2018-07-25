@@ -1,0 +1,7 @@
+{% extends "base.txt" %}
+
+{% block content %}
+Manifest {{ manifest_id }} has been created by {{ user_identifier }} with you as the named contact.
+
+Please visit {{ link }} to view the manifest.
+{% endblock %}
