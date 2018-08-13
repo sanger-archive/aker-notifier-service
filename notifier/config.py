@@ -6,7 +6,7 @@ class Config:
     """Extract the config from the provided config file path."""
 
     BrokerConfig = namedtuple('BrokerConfig',
-                              'user password host port virtual_host exchange exchange_type queue')
+                              'user password host port virtual_host queue')
     EmailConfig = namedtuple('EmailConfig', '''from_address,
                                                smtp_host,
                                                smtp_port,
@@ -55,8 +55,6 @@ class Config:
             config.get(section, 'host'),
             config.getint(section, 'port'),
             config.get(section, 'virtual_host'),
-            config.get(section, 'exchange'),
-            config.get(section, 'exchange_type'),
             config.get(section, 'queue'),
         )
 
