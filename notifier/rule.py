@@ -38,17 +38,21 @@ class Rule:
         logger.debug("_on_manifest_create triggered")
         to, data = self._common_manifest()
         data['user_identifier'] = self._message.user_identifier
+        subject = "{0} {1}".format(SBJ_MAN_CREATED, self._message.metadata['manifest_id'])
+
         # Send a manifest created email
-        self._notify.send_email(subject=SBJ_MAN_CREATED,
+        self._notify.send_email(subject=subject,
                                 from_address=self._config.email.from_address,
                                 to=to,
                                 template='manifest_created',
                                 data=data)
+
         # Send an email to the ethics officer
         if self._message.metadata.get('hmdmc'):
             data['hmdmc_list'] = self._message.metadata['hmdmc']
+            subject = "{0} {1}".format(SBJ_MAN_CREATED_HMDMC, self._message.metadata['manifest_id'])
             # Use the same link we have already created for the manifest
-            self._notify.send_email(subject=SBJ_MAN_CREATED_HMDMC,
+            self._notify.send_email(subject=subject,
                                     from_address=self._config.email.from_address,
                                     to=[self._config.contact.email_hmdmc_verify],
                                     template='manifest_created_hmdmc',
@@ -64,7 +68,10 @@ class Rule:
             data['created_at'] = self._message.metadata['created_at']
         if self._message.metadata.get('all_received'):
             data['all_received'] = self._message.metadata['all_received']
-        self._notify.send_email(subject=SBJ_MAN_RECEIVED,
+
+        subject = "{0} {1}".format(SBJ_MAN_RECEIVED, self._message.metadata['manifest_id'])
+
+        self._notify.send_email(subject=subject,
                                 from_address=self._config.email.from_address,
                                 to=to,
                                 template='manifest_received',
@@ -79,11 +86,15 @@ class Rule:
             logger.error(error.message)
         data['user_identifier'] = self._message.user_identifier
         data['work_order_status'] = self._message.event_type.split('.')[-1]
+
+        subject = "{0} {1} {2} [Data release:{3}]".format(
+            SBJ_PREFIX_WO,
+            self._message.metadata['work_order_id'],
+            data['work_order_status'].capitalize(),
+            self._message.notifier_info['drs_study_code'])
+
         self._notify.send_email(
-            subject="{0} {1} [Data release:{2}]".format(
-                SBJ_PREFIX_WO,
-                data['work_order_status'].capitalize(),
-                self._message.notifier_info['drs_study_code']),
+            subject=subject,
             from_address=self._config.email.from_address,
             to=to,
             template='wo_event',
