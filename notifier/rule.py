@@ -140,7 +140,7 @@ class Rule:
         # Check if we can create a link
         if self._message.metadata.get('manifest_id'):
             data['manifest_id'] = self._message.metadata['manifest_id']
-            data['link'] = self._generate_link(PATH_RECEPTION,
+            data['link'] = self._generate_manifest_link(PATH_RECEPTION,
                                                self._message.metadata['manifest_id'])
         # Add the sample custodian to the to list
         if self._message.metadata.get('sample_custodian'):
@@ -167,7 +167,7 @@ class Rule:
         """Extract the common info for catalogue events - currently just dev team email address."""
         return [self._config.contact.email_dev_team]
 
-    def _generate_link(self, path, id):
+    def _generate_manifest_link(self, path, id):
         """Generate a link to the specific entity in the app provided by path."""
         return '{}://{}:{}/{}/{}'.format(self._config.link.protocol,
                                          self._config.link.root,

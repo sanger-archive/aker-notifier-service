@@ -15,7 +15,7 @@ class MessageTests(unittest.TestCase):
                                 user_identifier='test@sanger.ac.uk',
                                 metadata={'sample_custodian': 'sc@sanger.ac.uk'},
                                 notifier_info={'work_plan_id': 1,
-                                               'drs_study_code': 1234})
+                                               'drs_study_code': 1})
 
     def test_init(self):
         message = Message(event_type=self._fake_message.event_type,
