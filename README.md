@@ -11,6 +11,7 @@ To install all the required packages, execute `pip install -r requirements.txt`
 
 # Testing
 To run all the tests, execute `nosetests --rednose` from the root directory.
+Add `--nocapture` as an argument if you don't want debug 'print' messages to be captured
 
 # Misc.
 ## Useful links
