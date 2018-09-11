@@ -33,25 +33,25 @@ class MessageTests(unittest.TestCase):
     def test_from_json(self):
         message_as_json = '''
             {{
-                "event_type":"{}",
-                "timestamp":"{}",
-                "user_identifier":"{}",
+                "event_type":"{a}",
+                "timestamp":"{b}",
+                "user_identifier":"{c}",
                 "metadata":{{
-                    "{}":"{}"
+                    "{d}":"{e}"
                 }},
                 "notifier_info":{{
-                    "{}":{},
-                    "{}":{}
+                    "{f}":{g},
+                    "{h}":{i}
                 }}
-            }}'''.format(self._fake_message.event_type,
-                         self._fake_message.timestamp,
-                         self._fake_message.user_identifier,
-                         list(self._fake_message.metadata.keys())[0],
-                         self._fake_message.metadata['sample_custodian'],
-                         list(self._fake_message.notifier_info.keys())[0],
-                         self._fake_message.notifier_info['work_plan_id'],
-                         list(self._fake_message.notifier_info.keys())[1],
-                         self._fake_message.notifier_info['drs_study_code'])
+            }}'''.format(a=self._fake_message.event_type,
+                         b=self._fake_message.timestamp,
+                         c=self._fake_message.user_identifier,
+                         d='sample_custodian',
+                         e=self._fake_message.metadata['sample_custodian'],
+                         f='work_plan_id',
+                         g=self._fake_message.notifier_info['work_plan_id'],
+                         h='drs_study_code',
+                         i=self._fake_message.notifier_info['drs_study_code'])
 
         message = Message.from_json(message_as_json)
         self.assertEqual(message.event_type, self._fake_message.event_type)

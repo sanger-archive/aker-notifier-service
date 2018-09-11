@@ -1,7 +1,6 @@
 import dateutil.parser
 import unittest
-from unittest import mock
-from unittest.mock import Mock
+from mock import patch, Mock, call
 from collections import namedtuple
 from datetime import datetime
 from notifier.consts import *
@@ -21,14 +20,26 @@ class RulesTests(unittest.TestCase):
                                 notifier_info={'work_plan_id': 1,
                                                'drs_study_code': 1234})
 
-    def create_fake_generic_message(self, event_type):
+    def create_fake_generic_manifest_message(self, event_type):
+        return self.FakeMessage(event_type,
+                                timestamp=datetime.now().isoformat(),
+                                user_identifier='test@sanger.ac.uk',
+                                metadata={'sample_custodian': 'sc@sanger.ac.uk', 'manifest_id': 123},
+                                notifier_info={'work_plan_id': 1, 'drs_study_code': 1234})
+
+    def create_fake_generic_work_order_message(self, event_type, drs_study_code):
+        return self.FakeMessage(event_type,
+                                timestamp=datetime.now().isoformat(),
+                                user_identifier='test@sanger.ac.uk',
+                                metadata={'work_order_id': 123},
+                                notifier_info={'work_plan_id': 1, 'drs_study_code': drs_study_code})
+
+    def create_fake_generic_catalogue_message(self, event_type):
         return self.FakeMessage(event_type,
                                 timestamp=datetime.now().isoformat(),
                                 user_identifier='test@sanger.ac.uk',
                                 metadata={'sample_custodian': 'sc@sanger.ac.uk'},
-                                notifier_info={'work_plan_id': 1,
-                                               'drs_study_code': 1234})
-
+                                notifier_info={'work_plan_id': 1, 'drs_study_code': 1234})
     def test_init(self):
         rule = Rule(env='test_env', config='test_config', message=self._fake_message)
         self.assertEqual(rule._env, 'test_env')
@@ -37,7 +48,7 @@ class RulesTests(unittest.TestCase):
         self.assertIsInstance(rule._notify, Notify)
 
     def test_manifest_create_triggered(self):
-        message = self.create_fake_generic_message(EVENT_MAN_CREATED)
+        message = self.create_fake_generic_manifest_message(EVENT_MAN_CREATED)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -57,7 +68,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_manifest_received_triggered(self):
-        message = self.create_fake_generic_message(EVENT_MAN_RECEIVED)
+        message = self.create_fake_generic_manifest_message(EVENT_MAN_RECEIVED)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -77,7 +88,8 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_work_order_dispatched_event_triggered(self):
-        message = self.create_fake_generic_message(EVENT_WO_DISPATCHED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -97,7 +109,8 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_work_order_concluded_event_triggered(self):
-        message = self.create_fake_generic_message(EVENT_WO_CONCLUDED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED, drs_study_code)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -117,7 +130,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_catalogue_new_event_triggered(self):
-        message = self.create_fake_generic_message(EVENT_CAT_NEW)
+        message = self.create_fake_generic_catalogue_message(EVENT_CAT_NEW)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -137,7 +150,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_catalogue_processed_event_triggered(self):
-        message = self.create_fake_generic_message(EVENT_CAT_PROCESSED)
+        message = self.create_fake_generic_catalogue_message(EVENT_CAT_PROCESSED)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -157,7 +170,7 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_catalogue_rejected_event_triggered(self):
-        message = self.create_fake_generic_message(EVENT_CAT_REJECTED)
+        message = self.create_fake_generic_catalogue_message(EVENT_CAT_REJECTED)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -175,19 +188,6 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_new.assert_not_called()
         rule._on_catalogue_processed.assert_not_called()
         rule._on_catalogue_rejected.assert_called_once()
-
-    @mock.patch('notifier.rule.Notify', autospec=True)
-    def test_manifest_create_email(self, mocked_notify):
-        message = self.create_fake_generic_message(EVENT_MAN_CREATED)
-        rule = Rule(env='test', config=config, message=message)
-        rule.check_rules()
-        self.assertIsInstance(mocked_notify, Notify)
-        mocked_notify.return_value.send_email.assert_called_once_with(
-            subject=SBJ_MAN_CREATED,
-            from_address=config.email.from_address,
-            template='manifest_created',
-            to=['test@sanger.ac.uk', 'sc@sanger.ac.uk'],
-            data={'user_identifier': 'test@sanger.ac.uk'})
 
     def test_common_work_order_with_id(self):
         message = self.FakeMessage(
@@ -227,8 +227,8 @@ class RulesTests(unittest.TestCase):
                       'deputies': ['dep1@sanger.ac.uk', 'dep2@sanger.ac.uk']},
             notifier_info={'work_plan_id': 1, 'drs_study_code': 1234})
         rule = Rule(env='test', config=config, message=message)
-        rule._generate_link = Mock()
-        rule._generate_link.return_value = ''
+        rule._generate_manifest_link = Mock()
+        rule._generate_manifest_link.return_value = ''
 
         to, data = rule._common_manifest()
 
@@ -237,16 +237,153 @@ class RulesTests(unittest.TestCase):
                               'dep1@sanger.ac.uk', 'dep2@sanger.ac.uk']),
         self.assertEqual(data, {'manifest_id': message.metadata['manifest_id'], 'link': ''})
 
-    @mock.patch('notifier.rule.Notify', autospec=True)
-    def test_on_catalogue_new(self, mocked_notify):
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_manifest_create(self, mocked_notify):
+        message = self.create_fake_generic_manifest_message(EVENT_MAN_CREATED)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+        subject = SBJ_MAN_CREATED + ' ' + str(message.metadata['manifest_id'])
+
+        data = {'manifest_id': message.metadata['manifest_id'],
+            'link': self._generate_manifest_link(message.metadata['manifest_id']),
+            'user_identifier': 'test@sanger.ac.uk'}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='manifest_created',
+            to=['test@sanger.ac.uk', 'sc@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_manifest_create_with_hmdmc(self, mocked_notify):
         message = self.FakeMessage(
-            event_type=EVENT_CAT_NEW,
+            event_type=EVENT_MAN_CREATED,
             timestamp=datetime.now().isoformat(),
             user_identifier='test@sanger.ac.uk',
-            metadata={},
+            metadata={'sample_custodian': 'sc@sanger.ac.uk', 'manifest_id': 123, 'hmdmc': 'abc321'},
             notifier_info={})
-        rule = Rule(env='test', config=config, message=message)
 
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+
+        self.assertIsInstance(mocked_notify, Notify)
+        self.assertEqual(mocked_notify.return_value.send_email.call_count, 2)
+
+        exp1 = call(data={'hmdmc_list': 'abc321', 'manifest_id': 123, 'link': 'http://aker.localhost:80/reception/material_submissions/123', 'user_identifier': 'test@sanger.ac.uk'},
+            from_address=u'no-reply@sanger.ac.uk',
+            subject='Aker | Manifest Created 123',
+            template='manifest_created',
+            to=['test@sanger.ac.uk', 'sc@sanger.ac.uk'])
+
+        exp2 = call(data={'hmdmc_list': 'abc321', 'manifest_id': 123, 'link': 'http://aker.localhost:80/reception/material_submissions/123', 'user_identifier': 'test@sanger.ac.uk'},
+            from_address=u'no-reply@sanger.ac.uk',
+            subject='Aker | Manifest Created with HMDMC 123',
+            template='manifest_created_hmdmc',
+            to=[u'hmdmc_verify@sanger.ac.uk'])
+
+        mocked_notify.return_value.send_email.assert_has_calls([exp1, exp2], any_order=True)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_manifest_received(self, mocked_notify):
+        message = self.create_fake_generic_manifest_message(EVENT_MAN_RECEIVED)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+        subject = SBJ_MAN_RECEIVED + ' ' + str(message.metadata['manifest_id'])
+
+        data = {'manifest_id': message.metadata['manifest_id'],
+            'link': self._generate_manifest_link(message.metadata['manifest_id'])}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='manifest_received',
+            to=['test@sanger.ac.uk', 'sc@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_work_order_dispatched(self, mocked_notify):
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+
+        subject = "{0} {1} {2} [Data release:{3}]".format(
+            SBJ_PREFIX_WO,
+            message.metadata['work_order_id'],
+            'Dispatched',
+            message.notifier_info['drs_study_code'])
+
+        data = {'user_identifier': 'test@sanger.ac.uk',
+            'link': self._generate_wo_link(message.notifier_info['work_plan_id']),
+            'work_order_status': 'dispatched',
+            'work_order_id': message.metadata['work_order_id']}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='wo_event',
+            to=['test@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_work_order_concluded(self, mocked_notify):
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED, drs_study_code)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+
+        subject = "{0} {1} {2} [Data release:{3}]".format(
+            SBJ_PREFIX_WO,
+            message.metadata['work_order_id'],
+            'Concluded',
+            message.notifier_info['drs_study_code'])
+
+        data = {'user_identifier': 'test@sanger.ac.uk',
+            'link': self._generate_wo_link(message.notifier_info['work_plan_id']),
+            'work_order_status': 'concluded',
+            'work_order_id': message.metadata['work_order_id']}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='wo_event',
+            to=['test@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_work_order_dispatched_no_drs_study_code(self, mocked_notify):
+        drs_study_code = 'nil'
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+
+        subject = "{0} {1} {2} [Data release:{3}]".format(
+            SBJ_PREFIX_WO,
+            message.metadata['work_order_id'],
+            'Dispatched',
+            message.notifier_info['drs_study_code'])
+
+        data = {'user_identifier': 'test@sanger.ac.uk',
+            'link': self._generate_wo_link(message.notifier_info['work_plan_id']),
+            'work_order_status': 'dispatched',
+            'work_order_id': message.metadata['work_order_id']}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='wo_event',
+            to=['test@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_catalogue_new(self, mocked_notify):
+        rule = Rule(env='test', config=config, message='')
         rule._on_catalogue_new()
 
         mocked_notify.return_value.send_email.assert_called_once_with(
@@ -257,16 +394,9 @@ class RulesTests(unittest.TestCase):
             data={}
         )
 
-    @mock.patch('notifier.rule.Notify', autospec=True)
+    @patch('notifier.rule.Notify', autospec=True)
     def test_on_catalogue_processed(self, mocked_notify):
-        message = self.FakeMessage(
-            event_type=EVENT_CAT_PROCESSED,
-            timestamp=datetime.now().isoformat(),
-            user_identifier='test@sanger.ac.uk',
-            metadata={},
-            notifier_info={})
-        rule = Rule(env='test', config=config, message=message)
-
+        rule = Rule(env='test', config=config, message='')
         rule._on_catalogue_processed()
 
         mocked_notify.return_value.send_email.assert_called_once_with(
@@ -277,7 +407,7 @@ class RulesTests(unittest.TestCase):
             data={}
         )
 
-    @mock.patch('notifier.rule.Notify', autospec=True)
+    @patch('notifier.rule.Notify', autospec=True)
     def test_on_catalogue_rejected(self, mocked_notify):
         message = self.FakeMessage(
             event_type=EVENT_CAT_REJECTED,
@@ -286,7 +416,6 @@ class RulesTests(unittest.TestCase):
             metadata={'error': 'error message'},
             notifier_info={})
         rule = Rule(env='test', config=config, message=message)
-
         rule._on_catalogue_rejected()
 
         mocked_notify.return_value.send_email.assert_called_once_with(
@@ -297,9 +426,9 @@ class RulesTests(unittest.TestCase):
             data={'error': message.metadata['error'], 'timestamp': message.timestamp}
         )
 
-    @mock.patch('notifier.rule.Notify')
+    @patch('notifier.rule.Notify')
     def test_common_work_order_called(self, mocked_notify):
-        message = self.create_fake_generic_message(EVENT_WO_DISPATCHED)
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, 1234)
         rule = Rule(env='test', config=config, message=message)
         rule._common_work_order = Mock()
         rule._common_work_order.return_value = [], {}
@@ -307,9 +436,9 @@ class RulesTests(unittest.TestCase):
 
         rule._common_work_order.assert_called_once()
 
-    @mock.patch('notifier.rule.Notify')
+    @patch('notifier.rule.Notify')
     def test_common_manifest_called(self, mocked_notify):
-        message = self.create_fake_generic_message(EVENT_MAN_RECEIVED)
+        message = self.create_fake_generic_manifest_message(EVENT_MAN_RECEIVED)
         rule = Rule(env='test', config=config, message=message)
         rule._common_manifest = Mock()
         rule._common_manifest.return_value = [], {}
@@ -321,11 +450,11 @@ class RulesTests(unittest.TestCase):
         rule = Rule(env='test', config=config, message='')
         self.assertEqual(rule._common_catalogue(), [config.contact.email_dev_team])
 
-    def test_generate_link(self):
+    def test_generate_manifest_link(self):
         rule = Rule(env='test', config=config, message='')
         path = 'path'
         id = 'id'
-        link = rule._generate_link(path, id)
+        link = rule._generate_manifest_link(path, id)
         self.assertEqual(link, '{}://{}:{}/{}/{}'.format(
             config.link.protocol,
             config.link.root,
@@ -344,3 +473,18 @@ class RulesTests(unittest.TestCase):
             PATH_WORK_ORDER_BEGIN,
             work_plan_id,
             PATH_WORK_ORDER_END))
+
+    def _generate_manifest_link(self, manifest_id):
+        return '{}://{}:{}/{}/{}'.format(config.link.protocol,
+                                            config.link.root,
+                                            config.link.port,
+                                            PATH_RECEPTION,
+                                            manifest_id)
+
+    def _generate_wo_link(self, work_plan_id):
+        return '{}://{}:{}/{}/{}/{}'.format(config.link.protocol,
+                                            config.link.root,
+                                            config.link.port,
+                                            PATH_WORK_ORDER_BEGIN,
+                                            work_plan_id,
+                                            PATH_WORK_ORDER_END)
