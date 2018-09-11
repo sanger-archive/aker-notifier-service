@@ -27,12 +27,12 @@ class RulesTests(unittest.TestCase):
                                 metadata={'sample_custodian': 'sc@sanger.ac.uk', 'manifest_id': 123},
                                 notifier_info={'work_plan_id': 1, 'drs_study_code': 1234})
 
-    def create_fake_generic_work_order_message(self, event_type):
+    def create_fake_generic_work_order_message(self, event_type, drs_study_code):
         return self.FakeMessage(event_type,
                                 timestamp=datetime.now().isoformat(),
                                 user_identifier='test@sanger.ac.uk',
                                 metadata={'work_order_id': 123},
-                                notifier_info={'work_plan_id': 1, 'drs_study_code': 1234})
+                                notifier_info={'work_plan_id': 1, 'drs_study_code': drs_study_code})
 
     def create_fake_generic_catalogue_message(self, event_type):
         return self.FakeMessage(event_type,
@@ -88,7 +88,8 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_work_order_dispatched_event_triggered(self):
-        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -108,7 +109,8 @@ class RulesTests(unittest.TestCase):
         rule._on_catalogue_rejected.assert_not_called()
 
     def test_work_order_concluded_event_triggered(self):
-        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED, drs_study_code)
         rule = Rule(env='test', config='test', message=message)
 
         rule._on_manifest_create = Mock()
@@ -303,7 +305,8 @@ class RulesTests(unittest.TestCase):
 
     @patch('notifier.rule.Notify', autospec=True)
     def test_on_work_order_dispatched(self, mocked_notify):
-        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
         rule = Rule(env='test', config=config, message=message)
         rule.check_rules()
         self.assertIsInstance(mocked_notify, Notify)
@@ -328,7 +331,8 @@ class RulesTests(unittest.TestCase):
 
     @patch('notifier.rule.Notify', autospec=True)
     def test_on_work_order_concluded(self, mocked_notify):
-        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED)
+        drs_study_code = 1234
+        message = self.create_fake_generic_work_order_message(EVENT_WO_CONCLUDED, drs_study_code)
         rule = Rule(env='test', config=config, message=message)
         rule.check_rules()
         self.assertIsInstance(mocked_notify, Notify)
@@ -342,6 +346,32 @@ class RulesTests(unittest.TestCase):
         data = {'user_identifier': 'test@sanger.ac.uk',
             'link': self._generate_wo_link(message.notifier_info['work_plan_id']),
             'work_order_status': 'concluded',
+            'work_order_id': message.metadata['work_order_id']}
+
+        mocked_notify.return_value.send_email.assert_called_once_with(
+            subject=subject,
+            from_address=config.email.from_address,
+            template='wo_event',
+            to=['test@sanger.ac.uk'],
+            data=data)
+
+    @patch('notifier.rule.Notify', autospec=True)
+    def test_on_work_order_dispatched_no_drs_study_code(self, mocked_notify):
+        drs_study_code = 'nil'
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, drs_study_code)
+        rule = Rule(env='test', config=config, message=message)
+        rule.check_rules()
+        self.assertIsInstance(mocked_notify, Notify)
+
+        subject = "{0} {1} {2} [Data release:{3}]".format(
+            SBJ_PREFIX_WO,
+            message.metadata['work_order_id'],
+            'Dispatched',
+            message.notifier_info['drs_study_code'])
+
+        data = {'user_identifier': 'test@sanger.ac.uk',
+            'link': self._generate_wo_link(message.notifier_info['work_plan_id']),
+            'work_order_status': 'dispatched',
             'work_order_id': message.metadata['work_order_id']}
 
         mocked_notify.return_value.send_email.assert_called_once_with(
@@ -398,7 +428,7 @@ class RulesTests(unittest.TestCase):
 
     @patch('notifier.rule.Notify')
     def test_common_work_order_called(self, mocked_notify):
-        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED)
+        message = self.create_fake_generic_work_order_message(EVENT_WO_DISPATCHED, 1234)
         rule = Rule(env='test', config=config, message=message)
         rule._common_work_order = Mock()
         rule._common_work_order.return_value = [], {}
